@@ -1,2 +1,7 @@
-# sprout_c2023_project1
-The project 1 of Sprout C 2023
+# Sprout C2023 Project 1
+
+## TODO list and locks
+
+[Here][hackmd]
+
+[hackmd]: https://hackmd.io/p_ITv_F0SSSMzQjMoU1Fwg?view
