@@ -8,6 +8,10 @@ int menu() {
   return 1;
 }
 
+void gen_board() {
+  return;
+}
+
 void game_init() {
   return;
 }
@@ -50,7 +54,21 @@ void droping() {
   return;
 }
 
+bool in_board(Pos t) {
+  return (t.x >= 0 and t.y >= 0 and t.x < BOARD_WIDTH and t.y < BOARD_HEIGHT);
+}
+
 void reset_board() {
+  bool is_dead = 1;
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      if (in_board({i, j + 1})) is_dead &= !(check_swap({i, j}, {i, j + 1}));
+      if (in_board({i + 1, j})) is_dead &= !(check_swap({i, j}, {i + 1, j}));
+    }
+  }
+
+  if (is_dead) gen_board(); 
+
   return;
 }
 
