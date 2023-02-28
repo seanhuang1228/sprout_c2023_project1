@@ -1,14 +1,26 @@
 #include "splendor.hpp"
+#include <random>
 
 using namespace std;
 
 Gem gameboard[BOARD_HEIGHT][BOARD_WIDTH];
+mt19937 mt(1);
 
 int menu() {
   return 1;
 }
 
 void gen_board() {
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      gameboard[i][j].type = mt() % 5 + 1; // TODO: remain special gem
+    }
+  }
+
+  Pos bad_pos = {0, 0};
+  while (check_eliminate(&bad_pos)) {
+    gameboard[bad_pos.x][bad_pos.y].type = mt() % 5 + 1;
+  }
   return;
 }
 
@@ -16,23 +28,26 @@ void game_init() {
   return;
 }
 
-bool check_line(Pos p, bool test_x) {
+bool check_line(Pos p) {
   int curr_gem = gameboard[p.x][p.y].type;
-  if (test_x and p.x != 0 and p.x != BOARD_HEIGHT and 
+  if (p.x != 0 and p.x != BOARD_HEIGHT and 
       curr_gem == gameboard[p.x - 1][p.y].type and 
       curr_gem == gameboard[p.x + 1][p.y].type)
     return 1;
-  else if (p.y != 0 and p.y != BOARD_WIDTH and 
+  if (p.y != 0 and p.y != BOARD_WIDTH and 
       curr_gem == gameboard[p.x][p.y - 1].type and 
       curr_gem == gameboard[p.x][p.y + 1].type)
     return 1;
-  else return 0;
+  return 0;
 }
 
-bool check_eliminate() {
+bool check_eliminate(Pos *pos) {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (check_line((Pos){i, j}, true)) return 1;
+      if (check_line({i, j})) {
+        if (pos) *pos = {i, j};
+        return 1;
+      }
     }
   }
   return 0;
@@ -88,7 +103,7 @@ int main_game(int mode) {
 
     if (!check_swap(a, b)) continue;
 
-    while (check_eliminate()) {
+    while (check_eliminate(nullptr)) {
       eliminate();
       draw_board();
       droping();

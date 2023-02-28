@@ -30,3 +30,5 @@ struct Gem {
 
 int menu();
 int main_game(int mode);
+
+bool check_eliminate(Pos *pos);
