@@ -10,16 +10,20 @@ int menu() {
   return 1;
 }
 
+int gen_rand_type() {
+  return mt() % 5 + 1; // TODO: maybe use a faster way to random?
+}
+
 void gen_board() {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      gameboard[i][j].type = mt() % 5 + 1; // TODO: remain special gem
+      gameboard[i][j].type = gen_rand_type(); // TODO: remain special gem
     }
   }
 
   Pos bad_pos = {0, 0};
   while (check_eliminate(&bad_pos)) {
-    gameboard[bad_pos.x][bad_pos.y].type = mt() % 5 + 1;
+    gameboard[bad_pos.x][bad_pos.y].type = gen_rand_type();
   }
   return;
 }
