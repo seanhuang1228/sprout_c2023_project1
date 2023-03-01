@@ -57,8 +57,24 @@ bool check_eliminate(Pos *pos) {
   return 0;
 }
 
+int dist_sq(Pos a, Pos b) {
+  return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+}
+
 bool check_swap(Pos a, Pos b) {
-  return 1;
+  if (dist_sq(a, b) != 1) return 0;
+
+  Gem tmp = gameboard[a.x][a.y];
+  gameboard[a.x][a.y] = gameboard[b.x][b.y];
+  gameboard[b.x][b.y] = tmp;
+
+  bool ret = check_eliminate(nullptr);
+
+  tmp = gameboard[a.x][a.y];
+  gameboard[a.x][a.y] = gameboard[b.x][b.y];
+  gameboard[b.x][b.y] = tmp;
+
+  return ret;
 }
 
 void eliminate() {
