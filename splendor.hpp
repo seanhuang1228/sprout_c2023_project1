@@ -29,6 +29,15 @@ struct Gem {
 };
 
 int menu();
-int main_game(int mode);
+int main_game(int);
 
-bool check_eliminate(Pos *pos);
+int gen_rand_type(int);
+int dist_sq(Pos, Pos);
+
+bool check_line(Pos);
+bool check_eliminate(Pos*);
+bool check_swap(Pos, Pos);
+bool check_inboard(Pos);
+bool check_dead();
+
+void gen_board();
