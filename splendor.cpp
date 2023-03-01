@@ -93,7 +93,7 @@ bool check_inboard(Pos t) {
   return (t.x >= 0 and t.y >= 0 and t.x < BOARD_WIDTH and t.y < BOARD_HEIGHT);
 }
 
-void reset_board() {
+bool check_dead() {
   bool is_dead = 1;
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
@@ -102,9 +102,7 @@ void reset_board() {
     }
   }
 
-  if (is_dead) gen_board(); 
-
-  return;
+  return is_dead;
 }
 
 bool game_end(int mode) {
@@ -130,7 +128,7 @@ int main_game(int mode) {
     }
 
     step++;
-    reset_board();
+    if (check_dead()) gen_board();
 
     if (game_end(mode)) running = 0;
   } while (running);
