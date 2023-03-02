@@ -28,10 +28,15 @@ struct Gem {
   int ability;
 };
 
+struct ElimiData {
+  int total_elimi, mid_elimi, rnd_cnt;
+};
+
 int menu();
 int main_game(int);
 
-int gen_rand_type(int);
+int gen_rand_type();
+int gen_rand();
 int dist_sq(Pos, Pos);
 
 bool check_line(Pos);
@@ -41,3 +46,6 @@ bool check_inboard(Pos);
 bool check_dead();
 
 void gen_board();
+void eliminate();
+void gen_special(Pos, ElimiData);
+void tag_eliminate(Pos, Pos*, ElimiData*);
