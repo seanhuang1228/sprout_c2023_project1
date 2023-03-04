@@ -154,6 +154,21 @@ void draw_board() {
 }
 
 void droping() {
+  for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      if (gameboard[i][j].type == GEM_NULL) continue;
+      int curr_height = i + 1;
+      while (check_inboard({curr_height, j}) and gameboard[curr_height][j].type == GEM_NULL)
+        curr_height++;
+      swap(gameboard[curr_height][j], gameboard[i][j]);
+    }
+  }
+
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      if (gameboard[i][j].type == GEM_NULL) gameboard[i][j].type = gen_rand_type();
+    }
+  }
   return;
 }
 
@@ -203,6 +218,7 @@ int main_game(int mode) {
       eliminate();
       draw_board();
       droping();
+      draw_board();
     }
 
     step++;
