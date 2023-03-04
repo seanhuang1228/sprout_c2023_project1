@@ -90,13 +90,11 @@ void tag_eliminate(Pos pos, Pos buff[], ElimiData *data) {
 
   elimi_tags[pos.x][pos.y] = 1;
     data->total_elimi++;
+  if (moved_tags[pos.x][pos.y])
+    buff[data->rnd_cnt++] = pos;
   int ret = check_line(pos);
-  if (ret) {
-    buff[0] = pos;
-    buff++;
-    data->rnd_cnt++;
+  if (ret)
     data->mid_elimi++;
-  }
   if (ret & 1) {
     tag_eliminate({pos.x - 1, pos.y}, buff, data);
     tag_eliminate({pos.x + 1, pos.y}, buff, data);
@@ -141,6 +139,7 @@ void eliminate() {
   }
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
+      moved_tags[i][j] = 0;
       if (elimi_tags[i][j]) {
         elimi_tags[i][j] = 0;
         gameboard[i][j].type = GEM_NULL;
