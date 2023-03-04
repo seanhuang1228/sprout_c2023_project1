@@ -1,5 +1,5 @@
 #include "splendor.hpp"
-#include <random>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -18,13 +18,13 @@ int gen_rand() {
 }
 
 int gen_rand_type() {
-  return gen_rand() % 5 + 1; // TODO: maybe use a faster way to random?
+  return abs(gen_rand()) % 5 + 1; // TODO: maybe use a faster way to random?
 }
 
 void gen_board() {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      gameboard[i][j].type = gen_rand_type(); // TODO: remain special gem
+      gameboard[i][j].type = abs(gen_rand_type()); // TODO: remain special gem
     }
   }
 
@@ -35,9 +35,6 @@ void gen_board() {
   return;
 }
 
-void game_init() {
-  return;
-}
 
 bool check_line(Pos p) {
   int curr_gem = gameboard[p.x][p.y].type;
@@ -150,6 +147,13 @@ void eliminate() {
 }
 
 void draw_board() {
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      cout << gameboard[i][j].type << ' ';
+    }
+    cout << '\n';
+  }
+  sleep(1);
   return;
 }
 
@@ -199,6 +203,12 @@ void gem_swap(Pos a, Pos b) {
 
   moved_tags[a.x][a.y] = 1;
   moved_tags[b.x][b.y] = 1;
+}
+
+void game_init() {
+  gen_board();
+  draw_board();
+  return;
 }
 
 int main_game(int mode) {
