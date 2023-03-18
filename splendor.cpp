@@ -14,17 +14,17 @@ int menu() {
 }
 
 int gen_rand() {
-  return mt();
+  return abs((int)mt());
 }
 
 int gen_rand_type() {
-  return abs(gen_rand()) % 5 + 1; // TODO: maybe use a faster way to random?
+  return gen_rand() % 5 + 1; // TODO: maybe use a faster way to random?
 }
 
 void gen_board() {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      gameboard[i][j].type = abs(gen_rand_type()); // TODO: remain special gem
+      gameboard[i][j].type = gen_rand_type(); // TODO: remain special gem
     }
   }
 
@@ -36,14 +36,14 @@ void gen_board() {
 }
 
 
-bool check_line(Pos p) {
+int check_line(Pos p) {
   int curr_gem = gameboard[p.x][p.y].type;
   int ret = 0;
-  if (p.x != 0 and p.x != BOARD_HEIGHT and 
+  if (p.x != 0 and p.x != BOARD_HEIGHT - 1 and 
       curr_gem == gameboard[p.x - 1][p.y].type and 
       curr_gem == gameboard[p.x + 1][p.y].type)
     ret |= 1;
-  if (p.y != 0 and p.y != BOARD_WIDTH and 
+  if (p.y != 0 and p.y != BOARD_WIDTH - 1 and 
       curr_gem == gameboard[p.x][p.y - 1].type and 
       curr_gem == gameboard[p.x][p.y + 1].type)
     ret |= 2;
@@ -54,6 +54,9 @@ bool check_eliminate(Pos *pos) {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (check_line({i, j})) {
+#ifdef DEBUG
+        //cout << "line success at " << i << ", " << j << '\n';
+#endif
         if (pos) *pos = {i, j};
         return 1;
       }
@@ -86,10 +89,12 @@ void tag_eliminate(Pos pos, Pos buff[], ElimiData *data) {
   if (elimi_tags[pos.x][pos.y]) return;
 
   elimi_tags[pos.x][pos.y] = 1;
-    data->total_elimi++;
+  cout << "tags: " << "(" << pos.x << ", " << pos.y << ")\n";
+  data->total_elimi++;
   if (moved_tags[pos.x][pos.y])
     buff[data->rnd_cnt++] = pos;
   int ret = check_line(pos);
+  cout << "ret: " << ret << "\n";
   if (ret)
     data->mid_elimi++;
   if (ret & 1) {
@@ -128,7 +133,7 @@ void eliminate() {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_HEIGHT; ++j) {
       if (check_line({i, j})) {
-        ElimiData elimi_data;
+        ElimiData elimi_data = {};
         tag_eliminate({i, j}, buff, &elimi_data);
         gen_special(buff, elimi_data);
       }
@@ -153,6 +158,7 @@ void draw_board() {
     }
     cout << '\n';
   }
+  cout << "-------------------\n";
   sleep(1);
   return;
 }
@@ -160,11 +166,14 @@ void draw_board() {
 void droping() {
   for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (gameboard[i][j].type == GEM_NULL) continue;
-      int curr_height = i + 1;
+      if (gameboard[i][j].type != GEM_NULL) continue;
+      int curr_height = i - 1;
       while (check_inboard({curr_height, j}) and gameboard[curr_height][j].type == GEM_NULL)
         curr_height++;
-      swap(gameboard[curr_height][j], gameboard[i][j]);
+      if (check_inboard({curr_height, j})) {
+        cout << "(" << curr_height << ", " << j << ") is dropping to (" << i << ", " << j << ")\n";
+        swap(gameboard[curr_height][j], gameboard[i][j]);
+      }
     }
   }
 
@@ -193,13 +202,11 @@ bool check_dead() {
 }
 
 bool game_end(int mode) {
-  return 1;
+  return 0;
 }
 
 void gem_swap(Pos a, Pos b) {
-  Gem tmp = gameboard[a.x][a.y];
-  gameboard[a.x][a.y] = gameboard[b.x][b.y];
-  gameboard[b.x][b.y] = tmp;
+  swap(gameboard[a.x][a.y], gameboard[b.x][b.y]);
 
   moved_tags[a.x][a.y] = 1;
   moved_tags[b.x][b.y] = 1;
@@ -208,26 +215,50 @@ void gem_swap(Pos a, Pos b) {
 void game_init() {
   gen_board();
   draw_board();
+#ifdef DEBUG
+  cout << "init done\n";
+#endif
   return;
 }
 
 int main_game(int mode) {
-  int running = 0;
+  int running = 1;
   int step = 0;
   game_init();
   do {
     Pos a, b;
 
+#ifdef DEBUG
+    cout << "input two pos (0 base): \n";
+#endif
     cin >> a.x >> a.y;
     cin >> b.x >> b.y;
 
-    if (check_swap(a, b)) gem_swap(a, b);
+    if (check_swap(a, b)) {
+#ifdef DEBUG
+    cout << "after swap check\n";
+    draw_board();
+#endif
+      gem_swap(a, b);
+      draw_board();
+    }
     else continue;
+
+#ifdef DEBUG
+    cout << "after swap\n";
+    draw_board();
+#endif
 
     while (check_eliminate(nullptr)) {
       eliminate();
+#ifdef DEBUG
+      cout << "after eli\n";
+#endif
       draw_board();
       droping();
+#ifdef DEBUG
+      cout << "after dropping\n";
+#endif
       draw_board();
     }
 

@@ -39,7 +39,7 @@ int gen_rand_type();
 int gen_rand();
 int dist_sq(Pos, Pos);
 
-bool check_line(Pos);
+int check_line(Pos);
 bool check_eliminate(Pos*);
 bool check_swap(Pos, Pos);
 bool check_inboard(Pos);
