@@ -108,7 +108,7 @@ void tag_eliminate(Pos pos, Pos buff[], ElimiData *data) {
   return;
 }
 
-void gen_special(Pos *buff, ElimiData data) {
+void gen_special(Pos *buff, ElimiData data, Pos* r_data, int *idx) {
   int abi = ABI_NORMAL;
   if (data.total_elimi == 4) {
     abi = ABI_CROSS;
@@ -122,22 +122,29 @@ void gen_special(Pos *buff, ElimiData data) {
 
   if (!abi)  return;
 
-  Pos gen_pos = buff[gen_rand() % data.rnd_cnt];
-  gameboard[gen_pos.x][gen_pos.y].type = abi;
-  elimi_tags[gen_pos.x][gen_pos.y] = 0;
+  r_data[*idx] = buff[gen_rand() % data.rnd_cnt];
+  gameboard[r_data[*idx].x][r_data[*idx].y].ability = abi;
+  *idx = *idx + 1;
   return;
 }
 
 void eliminate() {
   Pos buff[BOARD_HEIGHT * BOARD_WIDTH];
+  Pos recover_data[BOARD_HEIGHT * BOARD_WIDTH];
+  int recover_idx = 0;
+
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_HEIGHT; ++j) {
       if (check_line({i, j})) {
         ElimiData elimi_data = {};
         tag_eliminate({i, j}, buff, &elimi_data);
-        gen_special(buff, elimi_data);
+        gen_special(buff, elimi_data, recover_data, &recover_idx);
       }
     }
+  }
+  for (int i = 0; i < recover_idx; ++i) {
+    cout <<  recover_data[i].x << ' ' << recover_data[i].y << '\n';
+    elimi_tags[recover_data[i].x][recover_data[i].y] = 0;
   }
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
@@ -152,13 +159,13 @@ void eliminate() {
 }
 
 void draw_board() {
+  system("clear");
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       cout << gameboard[i][j].type << ' ';
     }
     cout << '\n';
   }
-  cout << "-------------------\n";
   sleep(1);
   return;
 }
@@ -167,11 +174,10 @@ void droping() {
   for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (gameboard[i][j].type != GEM_NULL) continue;
-      int curr_height = i - 1;
+      int curr_height = i;
       while (check_inboard({curr_height, j}) and gameboard[curr_height][j].type == GEM_NULL)
-        curr_height++;
+        curr_height--;
       if (check_inboard({curr_height, j})) {
-        cout << "(" << curr_height << ", " << j << ") is dropping to (" << i << ", " << j << ")\n";
         swap(gameboard[curr_height][j], gameboard[i][j]);
       }
     }

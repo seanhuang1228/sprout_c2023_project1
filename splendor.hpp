@@ -32,6 +32,11 @@ struct ElimiData {
   int total_elimi, mid_elimi, rnd_cnt;
 };
 
+struct RecoverData {
+  Pos pos;
+  Gem gem;
+};
+
 int menu();
 int main_game(int);
 
@@ -47,5 +52,5 @@ bool check_dead();
 
 void gen_board();
 void eliminate();
-void gen_special(Pos, ElimiData);
+void gen_special(Pos*, ElimiData, Pos*, int*);
 void tag_eliminate(Pos, Pos*, ElimiData*);
