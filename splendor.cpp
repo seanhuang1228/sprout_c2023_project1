@@ -21,6 +21,18 @@ int gen_rand_type() {
   return gen_rand() % 5 + 1; // TODO: maybe use a faster way to random?
 }
 
+string get_color(int type) {
+  static string color_array[GEM_CNT] = {COLOR_NULL, COLOR_RUBY, COLOR_LAPIZ, COLOR_EMERALD, COLOR_AMBER, COLOR_AMETHYST};
+  string color = color_array[type];
+  string style = "\x1B[0;" + color + "m";
+  return style;
+}
+
+char get_style(int ability) {
+  static char ability_array[ABI_CNT] = {'o', '+', 'Q', 'z'};
+  return ability_array[ability];
+}
+
 void gen_board() {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
@@ -162,11 +174,13 @@ void draw_board() {
   system("clear");
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      cout << gameboard[i][j].type << ' ';
+      string color = get_color(gameboard[i][j].type);
+      cout << color << get_style(gameboard[i][j].ability) << ' ';
     }
     cout << '\n';
   }
   sleep(1);
+  cout << get_color(GEM_NULL);
   return;
 }
 
