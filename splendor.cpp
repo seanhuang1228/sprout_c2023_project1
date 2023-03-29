@@ -23,9 +23,7 @@ int gen_rand_type() {
 
 string get_color(int type) {
   static string color_array[GEM_CNT] = {COLOR_NULL, COLOR_RUBY, COLOR_LAPIZ, COLOR_EMERALD, COLOR_AMBER, COLOR_AMETHYST};
-  string color = color_array[type];
-  string style = "\x1B[0;" + color + "m";
-  return style;
+  return color_array[type];
 }
 
 char get_style(int ability) {
@@ -155,9 +153,9 @@ void eliminate() {
     }
   }
   for (int i = 0; i < recover_idx; ++i) {
-    cout <<  recover_data[i].x << ' ' << recover_data[i].y << '\n';
     elimi_tags[recover_data[i].x][recover_data[i].y] = 0;
   }
+  draw_board(2);
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       moved_tags[i][j] = 0;
@@ -170,18 +168,28 @@ void eliminate() {
   return;
 }
 
-void draw_board() {
+void clean_color() {
+  cout << "\x1b[0m";
+}
+
+void draw_board(int time) {
   system("clear");
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       string color = get_color(gameboard[i][j].type);
-      cout << color << get_style(gameboard[i][j].ability) << ' ';
+      string deco = elimi_tags[i][j] ? "5" : "0";
+      string ansi = "\x1b[" + deco + ";" + color + "m";
+      cout << ansi << get_style(gameboard[i][j].ability) << ' ';
+      clean_color();
     }
     cout << '\n';
   }
-  sleep(1);
-  cout << get_color(GEM_NULL);
+  sleep(time);
   return;
+}
+
+void draw_board() {
+  draw_board(1);
 }
 
 void droping() {
@@ -248,9 +256,7 @@ int main_game(int mode) {
   do {
     Pos a, b;
 
-#ifdef DEBUG
-    cout << "input two pos (0 base): \n";
-#endif
+    // cout << "input two pos (0 base): \n";
     cin >> a.x >> a.y;
     cin >> b.x >> b.y;
 
