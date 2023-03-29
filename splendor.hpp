@@ -29,6 +29,8 @@
 #define ABI_KILLSAME 4
 #define ABI_CNT 5
 
+#define DRAW_PAULSE_TIME 1
+
 struct Pos {
   int x, y;
 };

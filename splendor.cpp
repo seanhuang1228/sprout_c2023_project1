@@ -208,7 +208,7 @@ void clean_color() {
 }
 
 void draw_board(double time) {
-  // system("clear");
+  system("clear");
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       string color = get_color(gameboard[i][j].type);
@@ -224,7 +224,7 @@ void draw_board(double time) {
 }
 
 void draw_board() {
-  draw_board(0.5);
+  draw_board(DRAW_PAULSE_TIME);
 }
 
 void droping() {
@@ -236,13 +236,17 @@ void droping() {
         curr_height--;
       if (check_inboard({curr_height, j})) {
         swap(gameboard[curr_height][j], gameboard[i][j]);
+        moved_tags[i][j] = 1;
       }
     }
   }
 
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (gameboard[i][j].ability == ABI_NULL) gameboard[i][j].type = gen_rand_type(), gameboard[i][j].ability = ABI_NORMAL;
+      if (gameboard[i][j].ability == ABI_NULL)
+        gameboard[i][j].type = gen_rand_type(),
+        gameboard[i][j].ability = ABI_NORMAL,
+        moved_tags[i][j] = 1;
     }
   }
   return;
@@ -322,6 +326,7 @@ int main_game(int mode) {
 #endif
       draw_board();
     }
+    eliminate();
 
     step++;
     if (check_dead()) gen_board();
