@@ -142,7 +142,6 @@ bool check_swap(Pos a, Pos b) {
 void eli_dfs(Pos pos, ElimiData *data, Pos *rnd_q) {
   visited[pos.x][pos.y] = 1;
 
-  cout << "visiting: " << pos.x << ' ' << pos.y << '\n';
   for (int i = 0; i < 4; ++i) {
     Pos tar = {pos.x + dir[i].x, pos.y + dir[i].y};
     // cout << "tar: " << tar.x << " " << tar.y << " with " << !visited[tar.x][tar.y] << '\n';
@@ -256,7 +255,7 @@ void clean_color() {
 }
 
 void draw_board(double time) {
-  system("clear");
+  // system("clear");
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       string color = get_color(gameboard[i][j].type);
@@ -349,7 +348,9 @@ void gem_swap(Pos a, Pos b) {
 }
 
 void game_init() {
-  gen_board();
+  do {
+    gen_board();
+  } while(check_dead());
   draw_board();
 #ifdef DEBUG
   cout << "init done\n";
@@ -399,7 +400,10 @@ int main_game(int mode) {
     }
 
     step++;
-    if (check_dead()) gen_board();
+    while (check_dead()) {
+      gen_board();
+    }
+    draw_board(0);
 
     if (game_end(mode)) running = 0;
   } while (running);
