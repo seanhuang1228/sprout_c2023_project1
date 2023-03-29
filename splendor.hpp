@@ -15,7 +15,7 @@
 #define GEM_AMETHYST 5
 #define GEM_CNT 6
 
-#define COLOR_NULL "0"
+#define COLOR_NULL "37"
 #define COLOR_RUBY "91"
 #define COLOR_LAPIZ "34"
 #define COLOR_EMERALD "32"
