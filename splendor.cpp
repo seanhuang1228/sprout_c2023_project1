@@ -6,6 +6,8 @@ using namespace std;
 Gem gameboard[BOARD_HEIGHT][BOARD_WIDTH];
 bool moved_tags[BOARD_HEIGHT][BOARD_WIDTH];
 bool elimi_tags[BOARD_HEIGHT][BOARD_WIDTH];
+bool visited[BOARD_HEIGHT][BOARD_WIDTH];
+int success_line[BOARD_HEIGHT][BOARD_WIDTH] = {};
 
 mt19937 mt(1);
 
@@ -96,30 +98,34 @@ bool check_swap(Pos a, Pos b) {
   return ret;
 }
 
-void tag_eliminate(Pos pos, Pos buff[], ElimiData *data) {
-  if (elimi_tags[pos.x][pos.y]) return;
+void eli_dfs(Pos pos, ElimiData *data, Pos *rnd_q) {
+  static Pos dir[4] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
-  elimi_tags[pos.x][pos.y] = 1;
-  cout << "tags: " << "(" << pos.x << ", " << pos.y << ")\n";
+  visited[pos.x][pos.y] = 1;
+
+  for (int i = 0; i < 4; ++i) {
+    Pos tar = {pos.x + dir[i].x, pos.y + dir[i].y};
+    if (check_inboard(tar) and !visited[tar.x][tar.y]
+        and gameboard[pos.x][pos.y].type == gameboard[tar.x][tar.y].type
+        and elimi_tags[tar.x][tar.y]) {
+      eli_dfs(tar, data, rnd_q);
+    }
+  }
   data->total_elimi++;
-  if (moved_tags[pos.x][pos.y])
-    buff[data->rnd_cnt++] = pos;
-  int ret = check_line(pos);
-  cout << "ret: " << ret << "\n";
-  if (ret)
-    data->mid_elimi++;
-  if (ret & 1) {
-    tag_eliminate({pos.x - 1, pos.y}, buff, data);
-    tag_eliminate({pos.x + 1, pos.y}, buff, data);
+  data->mid_elimi += success_line[pos.x][pos.y];
+  if (moved_tags[pos.x][pos.y]) {
+    rnd_q[data->rnd_cnt++] = pos;
+    moved_tags[pos.x][pos.y] = 0;
   }
-  if (ret & 2) {
-    tag_eliminate({pos.x, pos.y - 1}, buff, data);
-    tag_eliminate({pos.x, pos.y + 1}, buff, data);
-  }
-  return;
 }
 
-void gen_special(Pos *buff, ElimiData data, Pos* r_data, int *idx) {
+void gen_special(Pos pos, Pos *r_data, int* idx) {
+  ElimiData data = {0, 0, 0};
+  Pos random_queue[BOARD_HEIGHT * BOARD_WIDTH] = {};
+  int queue_idx = 0;
+
+  eli_dfs(pos, &data, random_queue);
+
   int abi = ABI_NORMAL;
   if (data.total_elimi == 4) {
     abi = ABI_CROSS;
@@ -133,7 +139,7 @@ void gen_special(Pos *buff, ElimiData data, Pos* r_data, int *idx) {
 
   if (abi == ABI_NORMAL) return;
 
-  r_data[*idx] = buff[gen_rand() % data.rnd_cnt];
+  r_data[*idx] = random_queue[gen_rand() % data.rnd_cnt];
   gameboard[r_data[*idx].x][r_data[*idx].y].ability = abi;
   *idx = *idx + 1;
   return;
@@ -145,12 +151,28 @@ void eliminate() {
   int recover_idx = 0;
 
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
-    for (int j = 0; j < BOARD_HEIGHT; ++j) {
-      if (check_line({i, j})) {
-        ElimiData elimi_data = {};
-        tag_eliminate({i, j}, buff, &elimi_data);
-        gen_special(buff, elimi_data, recover_data, &recover_idx);
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      int check_ret = check_line({i, j});
+
+      if (!check_ret) {
+        continue;
       }
+
+      if (check_ret & 1) {
+        elimi_tags[i - 1][j] = 1;
+        elimi_tags[i + 1][j] = 1;
+      }
+      else if (check_ret & 2) {
+        elimi_tags[i][j - 1] = 1;
+        elimi_tags[i][j + 1] = 1;
+      }
+      elimi_tags[i][j] = 1;
+      success_line[i][j]++;
+    }
+  }
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      if (success_line[i][j]) gen_special({i, j}, recover_data, &recover_idx);
     }
   }
   for (int i = 0; i < recover_idx; ++i) {
@@ -258,7 +280,7 @@ int main_game(int mode) {
   do {
     Pos a, b;
 
-    // cout << "input two pos (0 base): \n";
+    cout << "input two pos (0 base): \n";
     cin >> a.x >> a.y;
     cin >> b.x >> b.y;
 

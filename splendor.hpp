@@ -63,7 +63,6 @@ bool check_dead();
 void gen_board();
 void eliminate();
 void gen_special(Pos*, ElimiData, Pos*, int*);
-void tag_eliminate(Pos, Pos*, ElimiData*);
 
 void draw_board();
 void draw_board(int time);
