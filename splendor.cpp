@@ -27,7 +27,7 @@ string get_color(int type) {
 }
 
 char get_style(int ability) {
-  static char ability_array[ABI_CNT] = {'o', '+', 'Q', 'z'};
+  static char ability_array[ABI_CNT] = {' ', 'o', '+', 'Q', 'z'};
   return ability_array[ability];
 }
 
@@ -35,6 +35,7 @@ void gen_board() {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       gameboard[i][j].type = gen_rand_type(); // TODO: remain special gem
+      gameboard[i][j].ability = gameboard[i][j].ability ? gameboard[i][j].ability : ABI_NORMAL;
     }
   }
 
@@ -130,7 +131,7 @@ void gen_special(Pos *buff, ElimiData data, Pos* r_data, int *idx) {
       abi = ABI_BOMB;
   }
 
-  if (!abi)  return;
+  if (abi == ABI_NORMAL) return;
 
   r_data[*idx] = buff[gen_rand() % data.rnd_cnt];
   gameboard[r_data[*idx].x][r_data[*idx].y].ability = abi;
@@ -162,6 +163,7 @@ void eliminate() {
       if (elimi_tags[i][j]) {
         elimi_tags[i][j] = 0;
         gameboard[i][j].type = GEM_NULL;
+        gameboard[i][j].ability = ABI_NULL;
       }
     }
   }
@@ -207,7 +209,7 @@ void droping() {
 
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (gameboard[i][j].type == GEM_NULL) gameboard[i][j].type = gen_rand_type();
+      if (gameboard[i][j].type == GEM_NULL) gameboard[i][j].type = gen_rand_type(), gameboard[i][j].ability = ABI_NORMAL;
     }
   }
   return;

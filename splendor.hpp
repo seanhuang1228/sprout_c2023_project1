@@ -15,18 +15,19 @@
 #define GEM_AMETHYST 5
 #define GEM_CNT 6
 
-#define COLOR_NULL "15"
+#define COLOR_NULL "0"
 #define COLOR_RUBY "91"
 #define COLOR_LAPIZ "34"
 #define COLOR_EMERALD "32"
 #define COLOR_AMBER "33"
 #define COLOR_AMETHYST "35"
 
-#define ABI_NORMAL 0
-#define ABI_CROSS 1
-#define ABI_BOMB 2
-#define ABI_KILLSAME 3
-#define ABI_CNT 4
+#define ABI_NULL 0
+#define ABI_NORMAL 1
+#define ABI_CROSS 2
+#define ABI_BOMB 3
+#define ABI_KILLSAME 4
+#define ABI_CNT 5
 
 struct Pos {
   int x, y;
