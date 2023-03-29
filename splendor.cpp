@@ -255,7 +255,7 @@ void clean_color() {
 }
 
 void draw_board(double time) {
-  // system("clear");
+  system("clear");
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       string color = get_color(gameboard[i][j].type);
