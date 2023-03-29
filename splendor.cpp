@@ -170,15 +170,17 @@ void eliminate() {
       success_line[i][j]++;
     }
   }
+
+  draw_board(2);
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (success_line[i][j]) gen_special({i, j}, recover_data, &recover_idx);
     }
   }
+
   for (int i = 0; i < recover_idx; ++i) {
     elimi_tags[recover_data[i].x][recover_data[i].y] = 0;
   }
-  draw_board(2);
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       moved_tags[i][j] = 0;
