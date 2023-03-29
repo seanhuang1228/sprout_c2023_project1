@@ -180,10 +180,10 @@ void draw_board(int time) {
       string deco = elimi_tags[i][j] ? "5" : "0";
       string ansi = "\x1b[" + deco + ";" + color + "m";
       cout << ansi << get_style(gameboard[i][j].ability) << ' ';
-      clean_color();
     }
     cout << '\n';
   }
+  clean_color();
   sleep(time);
   return;
 }
