@@ -105,6 +105,7 @@ void eli_dfs(Pos pos, ElimiData *data, Pos *rnd_q) {
 
   for (int i = 0; i < 4; ++i) {
     Pos tar = {pos.x + dir[i].x, pos.y + dir[i].y};
+    // cout << "tar: " << tar.x << " " << tar.y << " with " << !visited[tar.x][tar.y] << '\n';
     if (check_inboard(tar) and !visited[tar.x][tar.y]
         and gameboard[pos.x][pos.y].type == gameboard[tar.x][tar.y].type
         and elimi_tags[tar.x][tar.y]) {
@@ -124,6 +125,7 @@ void gen_special(Pos pos, Pos *r_data, int* idx) {
   Pos random_queue[BOARD_HEIGHT * BOARD_WIDTH] = {};
   int queue_idx = 0;
 
+
   eli_dfs(pos, &data, random_queue);
 
   int abi = ABI_NORMAL;
@@ -141,6 +143,7 @@ void gen_special(Pos pos, Pos *r_data, int* idx) {
 
   r_data[*idx] = random_queue[gen_rand() % data.rnd_cnt];
   gameboard[r_data[*idx].x][r_data[*idx].y].ability = abi;
+  if (abi == ABI_KILLSAME || abi == ABI_BOMB) gameboard[r_data[*idx].x][r_data[*idx].y].type = GEM_NULL;
   *idx = *idx + 1;
   return;
 }
@@ -149,6 +152,12 @@ void eliminate() {
   Pos buff[BOARD_HEIGHT * BOARD_WIDTH];
   Pos recover_data[BOARD_HEIGHT * BOARD_WIDTH];
   int recover_idx = 0;
+
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      visited[i][j] = 0;
+    }
+  }
 
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
@@ -198,8 +207,8 @@ void clean_color() {
   cout << "\x1b[0m";
 }
 
-void draw_board(int time) {
-  system("clear");
+void draw_board(double time) {
+  // system("clear");
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       string color = get_color(gameboard[i][j].type);
@@ -215,15 +224,15 @@ void draw_board(int time) {
 }
 
 void draw_board() {
-  draw_board(1);
+  draw_board(0.5);
 }
 
 void droping() {
   for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (gameboard[i][j].type != GEM_NULL) continue;
+      if (gameboard[i][j].ability != ABI_NULL) continue;
       int curr_height = i;
-      while (check_inboard({curr_height, j}) and gameboard[curr_height][j].type == GEM_NULL)
+      while (check_inboard({curr_height, j}) and gameboard[curr_height][j].ability == ABI_NULL)
         curr_height--;
       if (check_inboard({curr_height, j})) {
         swap(gameboard[curr_height][j], gameboard[i][j]);
@@ -233,7 +242,7 @@ void droping() {
 
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (gameboard[i][j].type == GEM_NULL) gameboard[i][j].type = gen_rand_type(), gameboard[i][j].ability = ABI_NORMAL;
+      if (gameboard[i][j].ability == ABI_NULL) gameboard[i][j].type = gen_rand_type(), gameboard[i][j].ability = ABI_NORMAL;
     }
   }
   return;

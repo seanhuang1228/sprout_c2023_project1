@@ -65,4 +65,4 @@ void eliminate();
 void gen_special(Pos*, ElimiData, Pos*, int*);
 
 void draw_board();
-void draw_board(int time);
+void draw_board(double time);
