@@ -13,7 +13,23 @@ Pos dir[4] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 mt19937 mt(1);
 
 int menu() {
-  return 1;
+  int game_mode = 0;
+  cout << "======================================\n\n"
+       << " Welcome to Sprout Crush!\n\n"
+       << " Two game modes:\n"
+       << " 1. Finite steps, max score!\n"
+       << " 2. Target score, min steps!\n\n"
+       << "======================================\n\n";
+
+  while (true) {
+    cout << "Select a mode, 1 or 2:\n";
+    cin >> game_mode;
+    if (game_mode == 1 || game_mode == 2) break;
+    else cout << "invalid mode! try again.\n\n";
+  }
+
+  system("clear");
+  return game_mode;
 }
 
 int gen_rand() {
@@ -264,7 +280,7 @@ void draw_board(double time) {
     cout << " " << i;
   }
   cout << '\n';
-  
+
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     /* Chi-chun edit: Display line numbers for the user's convenience. */
     cout << "\033[0m" << i << " ";
