@@ -22,6 +22,7 @@ int gen_rand() {
 
 int gen_rand_type() {
   return gen_rand() % 5 + 1; // TODO: maybe use a faster way to random?
+                             // Chi-chun edit: Did you mean mt19937 is too slow?
 }
 
 string get_color(int type) {
@@ -256,7 +257,17 @@ void clean_color() {
 
 void draw_board(double time) {
   system("clear");
+
+  /* Chi-chun edit: Display line numbers for the user's convenience. */
+  cout << " ";
+  for (int i = 0; i < BOARD_WIDTH; ++i) {
+    cout << " " << i;
+  }
+  cout << '\n';
+  
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    /* Chi-chun edit: Display line numbers for the user's convenience. */
+    cout << "\033[0m" << i << " ";
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       string color = get_color(gameboard[i][j].type);
       string deco = elimi_tags[i][j] ? "5" : "0";
@@ -274,7 +285,7 @@ void draw_board() {
   draw_board(DRAW_PAULSE_TIME);
 }
 
-void droping() {
+void dropping() {
   for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (gameboard[i][j].ability != ABI_NULL) continue;
@@ -373,7 +384,11 @@ int main_game(int mode) {
       gem_swap(a, b);
       draw_board();
     }
-    else continue;
+    else {
+      /* Chi-chun edit: Remind the user that invalid operations are taken */
+      cout << "invalid operation!\n";
+      continue;
+    };
 
 #ifdef DEBUG
     cout << "after swap\n";
@@ -386,7 +401,7 @@ int main_game(int mode) {
       cout << "after eli\n";
 #endif
       draw_board();
-      droping();
+      dropping();
 #ifdef DEBUG
       cout << "after dropping\n";
 #endif
