@@ -31,7 +31,7 @@
 
 #define DRAW_PAUSE_TIME 1
 
-#define STEP_LIMIT 1
+#define STEP_LIMIT 10
 #define SCORE_TARGET 36000
 
 struct Pos {
