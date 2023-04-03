@@ -61,7 +61,7 @@ char get_style(int ability) {
 void gen_board() {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      gameboard[i][j].type = gen_rand_type(); // TODO: remain special gem
+      gameboard[i][j].type = gen_rand_type();
       gameboard[i][j].ability = gameboard[i][j].ability ? gameboard[i][j].ability : ABI_NORMAL;
     }
   }
@@ -93,9 +93,6 @@ bool check_eliminate(Pos *pos) {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (check_line({i, j})) {
-#ifdef DEBUG
-        //cout << "line success at " << i << ", " << j << '\n';
-#endif
         if (pos) *pos = {i, j};
         return 1;
       }
@@ -168,7 +165,6 @@ void eli_dfs(Pos pos, ElimiData *data, Pos *rnd_q) {
 
   for (int i = 0; i < 4; ++i) {
     Pos tar = {pos.x + dir[i].x, pos.y + dir[i].y};
-    // cout << "tar: " << tar.x << " " << tar.y << " with " << !visited[tar.x][tar.y] << '\n';
     if (check_inboard(tar) and !visited[tar.x][tar.y]
         and gameboard[pos.x][pos.y].type == gameboard[tar.x][tar.y].type
         and elimi_tags[tar.x][tar.y]) {
