@@ -66,7 +66,7 @@ bool check_inboard(Pos);
 bool check_dead();
 
 void gen_board();
-void eliminate(int);
+void eliminate(int, int);
 void gen_special(Pos*, ElimiData, Pos*, int*);
 
 void draw_board(int, double);

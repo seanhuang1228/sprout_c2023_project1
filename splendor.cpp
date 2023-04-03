@@ -212,9 +212,10 @@ GemData gen_special(Pos pos, Pos *r_data, int* idx) {
   return ret;
 }
 
-void eliminate(int mode) {
+void eliminate(int mode, int combo) {
   Pos recover_data[BOARD_HEIGHT * BOARD_WIDTH];
   int recover_idx = 0;
+  int tmp_score = 0;
 
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
@@ -271,7 +272,7 @@ void eliminate(int mode) {
 
   for (int i = 0; i < recover_idx; ++i) {
     elimi_tags[recover_data[i].x][recover_data[i].y] = 0;
-    player_score += 100;
+    tmp_score += 100;
   }
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
@@ -280,10 +281,11 @@ void eliminate(int mode) {
         elimi_tags[i][j] = 0;
         gameboard[i][j].type = GEM_NULL;
         gameboard[i][j].ability = ABI_NULL;
-        player_score += 100;
+        tmp_score += 100;
       }
     }
   }
+  player_score += tmp_score * (10 + combo) / 10;
   return;
 }
 
@@ -442,11 +444,13 @@ int main_game(int mode) {
       continue;
     };
 
+    int combo = 0;
     do {
-      eliminate(mode);
+      eliminate(mode, combo);
       draw_board(mode);
       dropping();
       draw_board(mode);
+      combo++;
     } while (check_eliminate(nullptr));
 
     for (int i = 0; i < BOARD_HEIGHT; ++i) {
