@@ -142,8 +142,8 @@ void apply_cross(Pos pos) {
 bool check_swap(Pos a, Pos b) {
   if (dist_sq(a, b) != 1) return 0;
 
-  if ((gameboard[a.x][a.y].ability != ABI_NORMAL || gameboard[b.x][b.y].ability != ABI_NORMAL)
-      and !(gameboard[a.x][a.y].ability == gameboard[b.x][b.y].ability and gameboard[a.x][a.y].ability == ABI_KILLSAME)) {
+  if ((gameboard[a.x][a.y].ability > ABI_CROSS || gameboard[b.x][b.y].ability > ABI_CROSS)
+      and !(gameboard[a.x][a.y].type == GEM_NULL and gameboard[b.x][b.y].type == GEM_NULL)) {
     return 1;
   }
 
