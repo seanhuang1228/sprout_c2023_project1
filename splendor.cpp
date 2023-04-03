@@ -268,11 +268,6 @@ void eliminate(int mode) {
   for (int i = 0; i < gen_cnt; ++i) {
     gameboard[gen_buff[i].pos.x][gen_buff[i].pos.y] = gen_buff[i].gem;
   }
-  // for (int i = 0; i < BOARD_HEIGHT; ++i) {
-  //   for (int j = 0; j < BOARD_WIDTH; ++j) {
-  //     if (success_line[i][j]) gen_special({i, j}, recover_data, &recover_idx);
-  //   }
-  // }
 
   for (int i = 0; i < recover_idx; ++i) {
     elimi_tags[recover_data[i].x][recover_data[i].y] = 0;
@@ -447,21 +442,10 @@ int main_game(int mode) {
       continue;
     };
 
-#ifdef DEBUG
-    cout << "after swap\n";
-    draw_board(mode);
-#endif
-
     do {
       eliminate(mode);
-#ifdef DEBUG
-      cout << "after eli\n";
-#endif
       draw_board(mode);
       dropping();
-#ifdef DEBUG
-      cout << "after dropping\n";
-#endif
       draw_board(mode);
     } while (check_eliminate(nullptr));
 
