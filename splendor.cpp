@@ -184,7 +184,7 @@ void eli_dfs(Pos pos, ElimiData *data, Pos *rnd_q) {
   }
 }
 
-void gen_special(Pos pos, Pos *r_data, int* idx) {
+GemData gen_special(Pos pos, Pos *r_data, int* idx) {
   static Pos random_queue[BOARD_HEIGHT * BOARD_WIDTH] = {};
   ElimiData data = {0, 0, 0};
   int queue_idx = 0;
@@ -203,13 +203,13 @@ void gen_special(Pos pos, Pos *r_data, int* idx) {
       abi = ABI_BOMB;
   }
 
-  if (abi == ABI_NORMAL) return;
+  if (abi == ABI_NORMAL) return {};
 
   r_data[*idx] = random_queue[gen_rand() % data.rnd_cnt];
-  gameboard[r_data[*idx].x][r_data[*idx].y].ability = abi;
-  if (abi == ABI_KILLSAME || abi == ABI_BOMB) gameboard[r_data[*idx].x][r_data[*idx].y].type = GEM_NULL;
+  GemData ret = {r_data[*idx], {gameboard[r_data[*idx].x][r_data[*idx].y].type, abi}};
+  if (abi == ABI_KILLSAME || abi == ABI_BOMB) ret.gem.type = GEM_NULL;
   *idx = *idx + 1;
-  return;
+  return ret;
 }
 
 void eliminate(int mode) {
@@ -243,6 +243,19 @@ void eliminate(int mode) {
     }
   }
 
+  GemData gen_buff[BOARD_HEIGHT * BOARD_WIDTH] = {};
+  int gen_cnt = 0;
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      if (success_line[i][j]) {
+        GemData gem_data = gen_special({i, j}, recover_data, &recover_idx);
+        if (gem_data.gem.ability != ABI_NULL) {
+          gen_buff[gen_cnt++] = gem_data;
+        }
+      }
+    }
+  }
+
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (elimi_tags[i][j] and gameboard[i][j].ability == ABI_CROSS) {
@@ -251,13 +264,15 @@ void eliminate(int mode) {
     }
   }
 
-
   draw_board(mode, 2);
-  for (int i = 0; i < BOARD_HEIGHT; ++i) {
-    for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (success_line[i][j]) gen_special({i, j}, recover_data, &recover_idx);
-    }
+  for (int i = 0; i < gen_cnt; ++i) {
+    gameboard[gen_buff[i].pos.x][gen_buff[i].pos.y] = gen_buff[i].gem;
   }
+  // for (int i = 0; i < BOARD_HEIGHT; ++i) {
+  //   for (int j = 0; j < BOARD_WIDTH; ++j) {
+  //     if (success_line[i][j]) gen_special({i, j}, recover_data, &recover_idx);
+  //   }
+  // }
 
   for (int i = 0; i < recover_idx; ++i) {
     elimi_tags[recover_data[i].x][recover_data[i].y] = 0;

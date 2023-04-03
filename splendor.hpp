@@ -47,7 +47,7 @@ struct ElimiData {
   int total_elimi, mid_elimi, rnd_cnt;
 };
 
-struct RecoverData {
+struct GemData {
   Pos pos;
   Gem gem;
 };
