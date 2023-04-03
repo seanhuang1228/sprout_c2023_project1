@@ -276,6 +276,7 @@ void eliminate(int mode) {
 
   for (int i = 0; i < recover_idx; ++i) {
     elimi_tags[recover_data[i].x][recover_data[i].y] = 0;
+    player_score += 100;
   }
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
