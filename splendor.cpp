@@ -129,9 +129,13 @@ void apply_killsame(Pos pos, Pos tar) {
 }
 
 void apply_cross(Pos pos) {
+  elimi_tags[pos.x][pos.y] = 1;
   for (int i = 0; i < 4; ++i) {
-    Pos curr_pos = pos;
+    Pos curr_pos = {pos.x + dir[i].x, pos.y + dir[i].y};
     while (check_inboard(curr_pos)) {
+      if (!elimi_tags[curr_pos.x][curr_pos.y] and gameboard[curr_pos.x][curr_pos.y].ability == ABI_CROSS)
+        apply_cross(curr_pos);
+
       elimi_tags[curr_pos.x][curr_pos.y] = 1;
       curr_pos.x += dir[i].x;
       curr_pos.y += dir[i].y;
@@ -246,6 +250,7 @@ void eliminate(int mode) {
       }
     }
   }
+
 
   draw_board(mode, 2);
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
