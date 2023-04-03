@@ -9,10 +9,16 @@ bool elimi_tags[BOARD_HEIGHT][BOARD_WIDTH];
 bool visited[BOARD_HEIGHT][BOARD_WIDTH];
 int success_line[BOARD_HEIGHT][BOARD_WIDTH] = {};
 Pos dir[4] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+static int step_remained = STEP_LIMIT;
+static int step_used = 0;
+static int player_score = 0;
+static int best_step = INT32_MAX;
+static int best_score = 0;
 
 mt19937 mt(1);
 
 int menu() {
+  system("clear");
   int game_mode = 0;
   cout << "======================================\n\n"
        << " Welcome to Sprout Crush!\n\n"
@@ -24,6 +30,7 @@ int menu() {
   while (true) {
     cout << "Select a mode, 1 or 2:\n";
     cin >> game_mode;
+    cout << "Game mode: " << game_mode << endl;
     if (game_mode == 1 || game_mode == 2) break;
     else cout << "invalid mode! try again.\n\n";
   }
@@ -205,7 +212,7 @@ void gen_special(Pos pos, Pos *r_data, int* idx) {
   return;
 }
 
-void eliminate() {
+void eliminate(int mode) {
   Pos recover_data[BOARD_HEIGHT * BOARD_WIDTH];
   int recover_idx = 0;
 
@@ -244,7 +251,7 @@ void eliminate() {
     }
   }
 
-  draw_board(2);
+  draw_board(mode, 2);
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (success_line[i][j]) gen_special({i, j}, recover_data, &recover_idx);
@@ -261,6 +268,7 @@ void eliminate() {
         elimi_tags[i][j] = 0;
         gameboard[i][j].type = GEM_NULL;
         gameboard[i][j].ability = ABI_NULL;
+        player_score += 100;
       }
     }
   }
@@ -271,8 +279,19 @@ void clean_color() {
   cout << "\x1b[0m";
 }
 
-void draw_board(double time) {
+void draw_board(int mode, double time = DRAW_PAUSE_TIME) {
   system("clear");
+
+  if (mode == MODE_STEP) {
+    cout << "STEP REMAINED: " << step_remained << "\nSCORE: " << player_score;
+    if (best_score != 0) cout << " BEST SCORE: " << best_score;
+    cout << "\n\n";
+  }
+  else if (mode == MODE_SCORE) {
+    cout << "STEP USED: " << step_used << "\nSCORE/TARGET: " << player_score << "/" << SCORE_TARGET;
+    if (best_step != 0) cout << " BEST STEP: " << best_step;
+    cout << "\n\n";
+  }
 
   /* Chi-chun edit: Display line numbers for the user's convenience. */
   cout << " ";
@@ -295,10 +314,6 @@ void draw_board(double time) {
   clean_color();
   sleep(time);
   return;
-}
-
-void draw_board() {
-  draw_board(DRAW_PAULSE_TIME);
 }
 
 void dropping() {
@@ -343,7 +358,7 @@ bool check_dead() {
 }
 
 bool game_end(int mode) {
-  return 0;
+  return (mode == MODE_STEP && step_remained == 0) || (mode == MODE_SCORE && player_score >= SCORE_TARGET);
 }
 
 void gem_swap(Pos a, Pos b) {
@@ -374,11 +389,18 @@ void gem_swap(Pos a, Pos b) {
   moved_tags[b.x][b.y] = 1;
 }
 
-void game_init() {
+void init_global_variable() {
+  step_remained = STEP_LIMIT;
+  step_used = 0;
+  player_score = 0;
+}
+
+void game_init(int mode) {
   do {
     gen_board();
   } while(check_dead());
-  draw_board();
+  init_global_variable();
+  draw_board(mode);
 #ifdef DEBUG
   cout << "init done\n";
 #endif
@@ -388,7 +410,7 @@ void game_init() {
 int main_game(int mode) {
   int running = 1;
   int step = 0;
-  game_init();
+  game_init(mode);
   do {
     Pos a, b;
 
@@ -398,7 +420,9 @@ int main_game(int mode) {
 
     if (check_swap(a, b)) {
       gem_swap(a, b);
-      draw_board();
+      draw_board(mode);
+      step_remained--;
+      step_used++;
     }
     else {
       /* Chi-chun edit: Remind the user that invalid operations are taken */
@@ -408,20 +432,20 @@ int main_game(int mode) {
 
 #ifdef DEBUG
     cout << "after swap\n";
-    draw_board();
+    draw_board(mode);
 #endif
 
     do {
-      eliminate();
+      eliminate(mode);
 #ifdef DEBUG
       cout << "after eli\n";
 #endif
-      draw_board();
+      draw_board(mode);
       dropping();
 #ifdef DEBUG
       cout << "after dropping\n";
 #endif
-      draw_board();
+      draw_board(mode);
     } while (check_eliminate(nullptr));
 
     for (int i = 0; i < BOARD_HEIGHT; ++i) {
@@ -434,9 +458,20 @@ int main_game(int mode) {
     while (check_dead()) {
       gen_board();
     }
-    draw_board(0);
+    draw_board(mode, 0);
 
     if (game_end(mode)) running = 0;
   } while (running);
+  cout << "\nGame over!";
+  if (mode == MODE_STEP && player_score > best_score) {
+    best_score = player_score;
+    cout << " New record in mode 1!";
+  }
+  else if (mode == MODE_SCORE && step_used < best_step) {
+    best_step = step_used;
+    cout << " New record in mode 2!";
+  }
+  cout << endl;
+  sleep(3);
   return 0;
 }

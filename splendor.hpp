@@ -29,7 +29,10 @@
 #define ABI_KILLSAME 4
 #define ABI_CNT 5
 
-#define DRAW_PAULSE_TIME 1
+#define DRAW_PAUSE_TIME 1
+
+#define STEP_LIMIT 1
+#define SCORE_TARGET 36000
 
 struct Pos {
   int x, y;
@@ -63,8 +66,7 @@ bool check_inboard(Pos);
 bool check_dead();
 
 void gen_board();
-void eliminate();
+void eliminate(int);
 void gen_special(Pos*, ElimiData, Pos*, int*);
 
-void draw_board();
-void draw_board(double time);
+void draw_board(int, double);
