@@ -216,12 +216,14 @@ GemData gen_special(Pos pos) {
 void eliminate(int mode, int combo) {
   int tmp_score = 0;
 
+  // reset visited array for eli_dfs
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       visited[i][j] = 0;
     }
   }
 
+  // tag the gmes should be eliminate
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       int check_ret = check_line({i, j});
@@ -233,17 +235,17 @@ void eliminate(int mode, int combo) {
       if (check_ret & 1) {
         elimi_tags[i - 1][j] = 1;
         elimi_tags[i + 1][j] = 1;
-        success_line[i][j]++;
       }
       if (check_ret & 2) {
         elimi_tags[i][j - 1] = 1;
         elimi_tags[i][j + 1] = 1;
-        success_line[i][j]++;
       }
+      success_line[i][j] += (check_ret + 1) >> 2;
       elimi_tags[i][j] = 1;
     }
   }
 
+  // record the special gem will be generate
   GemData gen_buff[BOARD_HEIGHT * BOARD_WIDTH] = {};
   int gen_cnt = 0;
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
@@ -257,6 +259,7 @@ void eliminate(int mode, int combo) {
     }
   }
 
+  // apply specail ability of cross
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (elimi_tags[i][j] and gameboard[i][j].ability == ABI_CROSS) {
@@ -266,12 +269,15 @@ void eliminate(int mode, int combo) {
   }
 
   draw_board(mode, 2);
+
+  // generate special gem and calculate the score of them
   for (int i = 0; i < gen_cnt; ++i) {
     gameboard[gen_buff[i].pos.x][gen_buff[i].pos.y] = gen_buff[i].gem;
     elimi_tags[gen_buff[i].pos.x][gen_buff[i].pos.y] = 0;
     tmp_score += 100;
   }
 
+  // eliminate the gem
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       moved_tags[i][j] = 0;
@@ -330,6 +336,7 @@ void draw_board(int mode, double time = DRAW_PAUSE_TIME) {
 }
 
 void dropping() {
+  // dropping
   for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (gameboard[i][j].ability != ABI_NULL) continue;
@@ -343,6 +350,7 @@ void dropping() {
     }
   }
 
+  // generate new gem if the position is empty
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (gameboard[i][j].ability == ABI_NULL)
@@ -414,9 +422,6 @@ void game_init(int mode) {
   } while(check_dead());
   init_global_variable();
   draw_board(mode);
-#ifdef DEBUG
-  cout << "init done\n";
-#endif
   return;
 }
 
@@ -453,6 +458,7 @@ int main_game(int mode) {
       combo++;
     } while (check_eliminate(nullptr));
 
+    // reset moved_tags
     for (int i = 0; i < BOARD_HEIGHT; ++i) {
       for (int j = 0; j < BOARD_WIDTH; ++j) {
         moved_tags[i][j] = 0;
