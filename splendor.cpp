@@ -151,15 +151,9 @@ bool check_swap(Pos a, Pos b) {
     return 1;
   }
 
-  Gem tmp = gameboard[a.x][a.y];
-  gameboard[a.x][a.y] = gameboard[b.x][b.y];
-  gameboard[b.x][b.y] = tmp;
-
+  swap(gameboard[a.x][a.y], gameboard[b.x][b.y]);
   bool ret = check_eliminate(nullptr);
-
-  tmp = gameboard[a.x][a.y];
-  gameboard[a.x][a.y] = gameboard[b.x][b.y];
-  gameboard[b.x][b.y] = tmp;
+  swap(gameboard[a.x][a.y], gameboard[b.x][b.y]);
 
   return ret;
 }
