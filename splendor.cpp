@@ -323,6 +323,7 @@ void draw_board(int mode, double time = DRAW_PAUSE_TIME) {
     cout << '\n';
   }
   clean_color();
+  cout << "\n";
   sleep(time);
   return;
 }
@@ -425,7 +426,7 @@ int main_game(int mode) {
   do {
     Pos a, b;
 
-    cout << "input two pos (0 base): \n";
+    cout << "input two position:\n";
     cin >> a.x >> a.y;
     cin >> b.x >> b.y;
 
@@ -437,6 +438,7 @@ int main_game(int mode) {
     }
     else {
       /* Chi-chun edit: Remind the user that invalid operations are taken */
+      draw_board(mode, 0);
       cout << "invalid operation!\n";
       continue;
     };
