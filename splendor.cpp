@@ -1,5 +1,7 @@
 #include "splendor.hpp"
-#include <bits/stdc++.h>
+#include <random>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -140,6 +142,8 @@ void apply_cross(Pos pos) {
       if (!elimi_tags[curr_pos.x][curr_pos.y] and gameboard[curr_pos.x][curr_pos.y].ability == ABI_CROSS)
         apply_cross(curr_pos);
 
+      // TODO: cross toggle other specail gem
+
       elimi_tags[curr_pos.x][curr_pos.y] = 1;
       curr_pos.x += dir[i].x;
       curr_pos.y += dir[i].y;
@@ -265,7 +269,7 @@ void eliminate(int mode, int combo) {
     }
   }
 
-  draw_board(mode, 2);
+  draw_board(mode, 1500);
 
   // generate special gem and calculate the score of them
   for (int i = 0; i < gen_cnt; ++i) {
@@ -294,7 +298,7 @@ void clean_color() {
   cout << "\x1b[0m";
 }
 
-void draw_board(int mode, double time = DRAW_PAUSE_TIME) {
+void draw_board(int mode, int time = DRAW_PAUSE_TIME) {
   system("clear");
 
   if (mode == MODE_STEP) {
@@ -328,7 +332,7 @@ void draw_board(int mode, double time = DRAW_PAUSE_TIME) {
   }
   clean_color();
   cout << "\n";
-  sleep(time);
+  this_thread::sleep_for(chrono::milliseconds(time));
   return;
 }
 
@@ -502,6 +506,6 @@ int main_game(int mode) {
     cout << " New record in mode 2!";
   }
   cout << endl;
-  sleep(3);
+  this_thread::sleep_for(chrono::milliseconds(3000));
   return 0;
 }

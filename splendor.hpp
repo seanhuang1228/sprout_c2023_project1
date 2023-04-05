@@ -29,7 +29,7 @@
 #define ABI_KILLSAME 4
 #define ABI_CNT 5
 
-#define DRAW_PAUSE_TIME 1
+#define DRAW_PAUSE_TIME 500
 
 #define STEP_LIMIT 10
 #define SCORE_TARGET 36000
@@ -65,9 +65,5 @@ bool check_swap(Pos, Pos);
 bool check_inboard(Pos);
 bool check_dead();
 
-void gen_board();
-void eliminate(int, int);
-void gen_special(Pos*, ElimiData, Pos*, int*);
-
-void draw_board(int, double);
+void draw_board(int, int);
 void ai(Gem [][10], Pos*, Pos*);
