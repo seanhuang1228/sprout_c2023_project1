@@ -233,13 +233,14 @@ void eliminate(int mode, int combo) {
       if (check_ret & 1) {
         elimi_tags[i - 1][j] = 1;
         elimi_tags[i + 1][j] = 1;
+        success_line[i][j]++;
       }
-      else if (check_ret & 2) {
+      if (check_ret & 2) {
         elimi_tags[i][j - 1] = 1;
         elimi_tags[i][j + 1] = 1;
+        success_line[i][j]++;
       }
       elimi_tags[i][j] = 1;
-      success_line[i][j]++;
     }
   }
 
