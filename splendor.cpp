@@ -184,7 +184,7 @@ void eli_dfs(Pos pos, ElimiData *data, Pos *rnd_q) {
   }
 }
 
-GemData gen_special(Pos pos, Pos *r_data, int* idx) {
+GemData gen_special(Pos pos) {
   static Pos random_queue[BOARD_HEIGHT * BOARD_WIDTH] = {};
   ElimiData data = {0, 0, 0};
   int queue_idx = 0;
@@ -205,16 +205,15 @@ GemData gen_special(Pos pos, Pos *r_data, int* idx) {
 
   if (abi == ABI_NORMAL) return {};
 
-  r_data[*idx] = random_queue[gen_rand() % data.rnd_cnt];
-  GemData ret = {r_data[*idx], {gameboard[r_data[*idx].x][r_data[*idx].y].type, abi}};
-  if (abi == ABI_KILLSAME || abi == ABI_BOMB) ret.gem.type = GEM_NULL;
-  *idx = *idx + 1;
+  Pos ret_pos = random_queue[gen_rand() % data.rnd_cnt];
+  Gem ret_gem = gameboard[ret_pos.x][ret_pos.y];
+  ret_gem.ability = abi;
+  GemData ret = {ret_pos, ret_gem};
+    if (abi == ABI_KILLSAME || abi == ABI_BOMB) ret.gem.type = GEM_NULL;
   return ret;
 }
 
 void eliminate(int mode, int combo) {
-  Pos recover_data[BOARD_HEIGHT * BOARD_WIDTH];
-  int recover_idx = 0;
   int tmp_score = 0;
 
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
@@ -249,7 +248,7 @@ void eliminate(int mode, int combo) {
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (success_line[i][j]) {
-        GemData gem_data = gen_special({i, j}, recover_data, &recover_idx);
+        GemData gem_data = gen_special({i, j});
         if (gem_data.gem.ability != ABI_NULL) {
           gen_buff[gen_cnt++] = gem_data;
         }
@@ -268,12 +267,10 @@ void eliminate(int mode, int combo) {
   draw_board(mode, 2);
   for (int i = 0; i < gen_cnt; ++i) {
     gameboard[gen_buff[i].pos.x][gen_buff[i].pos.y] = gen_buff[i].gem;
-  }
-
-  for (int i = 0; i < recover_idx; ++i) {
-    elimi_tags[recover_data[i].x][recover_data[i].y] = 0;
+    elimi_tags[gen_buff[i].pos.x][gen_buff[i].pos.y] = 0;
     tmp_score += 100;
   }
+
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       moved_tags[i][j] = 0;
