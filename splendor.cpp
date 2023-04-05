@@ -21,6 +21,8 @@ static int best_score = 0;
 Gem copyboard[BOARD_HEIGHT][BOARD_WIDTH];
 #endif
 
+void apply_special(Pos, Pos);
+
 mt19937 mt(1);
 
 int menu() {
@@ -111,27 +113,31 @@ int dist_sq(Pos a, Pos b) {
   return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 }
 
-void apply_bomb(Pos pos) {
-  if (gameboard[pos.x][pos.y].ability == ABI_BOMB) {
-    for (int i = -1; i <= 1; ++i) {
-      for (int j = -1; j <= 1; ++j) {
-        if (check_inboard({pos.x + i, pos.y + j}))
-          elimi_tags[pos.x + i][pos.y + j] = 1;
-      }
+void apply_bomb(Pos pos, int recursive = 0) {
+  elimi_tags[pos.x][pos.y] = 1;
+  for (int i = -1; i <= 1; ++i) {
+    for (int j = -1; j <= 1; ++j) {
+      if (recursive and elimi_tags[pos.x + i][pos.y + j] == 0 and gameboard[pos.x + i][pos.y + j].ability > ABI_NORMAL)
+        apply_special({pos.x + i, pos.y + j}, {0, 0});
+      if (check_inboard({pos.x + i, pos.y + j}))
+        elimi_tags[pos.x + i][pos.y + j] = 1;
     }
   }
 }
 
-void apply_killsame(Pos pos, Pos tar) {
+void apply_killsame(Pos pos, Pos tar, int recursive = 0) {
   int type = gameboard[tar.x][tar.y].type;
+  elimi_tags[pos.x][pos.y] = 1;
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (gameboard[i][j].type == type) {
         elimi_tags[i][j] = 1;
+        if (recursive and elimi_tags[i][j] == 0 and gameboard[i][j].ability > ABI_NORMAL) {
+          apply_special({i, j}, {0, 0});
+        }
       }
     }
   }
-  elimi_tags[pos.x][pos.y] = 1;
 }
 
 void apply_cross(Pos pos) {
@@ -139,15 +145,25 @@ void apply_cross(Pos pos) {
   for (int i = 0; i < 4; ++i) {
     Pos curr_pos = {pos.x + dir[i].x, pos.y + dir[i].y};
     while (check_inboard(curr_pos)) {
-      if (!elimi_tags[curr_pos.x][curr_pos.y] and gameboard[curr_pos.x][curr_pos.y].ability == ABI_CROSS)
-        apply_cross(curr_pos);
-
-      // TODO: cross toggle other specail gem
+      if (!elimi_tags[curr_pos.x][curr_pos.y] and gameboard[curr_pos.x][curr_pos.y].ability > ABI_NORMAL)
+        apply_special(curr_pos, pos);
 
       elimi_tags[curr_pos.x][curr_pos.y] = 1;
       curr_pos.x += dir[i].x;
       curr_pos.y += dir[i].y;
     }
+  }
+}
+
+void apply_special(Pos pos, Pos tar) {
+  if (gameboard[pos.x][pos.y].ability == ABI_BOMB) {
+    apply_bomb(pos, 1);
+  }
+  if (gameboard[pos.x][pos.y].ability == ABI_CROSS) {
+    apply_cross(pos);
+  }
+  if (gameboard[pos.x][pos.y].ability == ABI_KILLSAME) {
+    apply_killsame(pos, tar, 1);
   }
 }
 
