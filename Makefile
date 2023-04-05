@@ -9,8 +9,8 @@ all: $(obj)
 %.o: %.c
 	$(CC) -c $^ -o $@
 
-test:
-	$(CC) -o $(exe) main.cpp splendor.cpp $(flag) -DDEBUG
+ai:
+	$(CC) -o $(exe) splendor.hpp main.cpp splendor.cpp ai.cpp $(flag) -DAI
 
 clean:
 	rm -rf $(obj) $(exe)

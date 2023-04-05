@@ -70,3 +70,4 @@ void eliminate(int, int);
 void gen_special(Pos*, ElimiData, Pos*, int*);
 
 void draw_board(int, double);
+void ai(Gem [][10], Pos*, Pos*);

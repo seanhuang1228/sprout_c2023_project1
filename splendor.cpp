@@ -15,6 +15,10 @@ static int player_score = 0;
 static int best_step = INT32_MAX;
 static int best_score = 0;
 
+#ifdef AI
+Gem copyboard[BOARD_HEIGHT][BOARD_WIDTH];
+#endif
+
 mt19937 mt(1);
 
 int menu() {
@@ -181,7 +185,6 @@ void eli_dfs(Pos pos, ElimiData *data, Pos *rnd_q) {
 GemData gen_special(Pos pos) {
   static Pos random_queue[BOARD_HEIGHT * BOARD_WIDTH] = {};
   ElimiData data = {0, 0, 0};
-  int queue_idx = 0;
 
 
   eli_dfs(pos, &data, random_queue);
@@ -203,7 +206,7 @@ GemData gen_special(Pos pos) {
   Gem ret_gem = gameboard[ret_pos.x][ret_pos.y];
   ret_gem.ability = abi;
   GemData ret = {ret_pos, ret_gem};
-    if (abi == ABI_KILLSAME || abi == ABI_BOMB) ret.gem.type = GEM_NULL;
+  if (abi == ABI_KILLSAME || abi == ABI_BOMB) ret.gem.type = GEM_NULL;
   return ret;
 }
 
@@ -234,7 +237,7 @@ void eliminate(int mode, int combo) {
         elimi_tags[i][j - 1] = 1;
         elimi_tags[i][j + 1] = 1;
       }
-      success_line[i][j] += (check_ret + 1) >> 2;
+      success_line[i][j] += (check_ret + 1) >> 1;
       elimi_tags[i][j] = 1;
     }
   }
@@ -426,15 +429,36 @@ int main_game(int mode) {
   do {
     Pos a, b;
 
+#ifdef AI
+    for (int i = 0; i < BOARD_HEIGHT; ++i) {
+      for (int j = 0; j < BOARD_WIDTH; ++j) {
+        copyboard[i][j] = gameboard[i][j];
+      }
+    }
+    ai (copyboard, &a, &b);
+
+    step_remained--;
+    step_used++;
+    if (check_swap(a, b)) {
+      gem_swap(a, b);
+      draw_board(mode);
+    }
+    else if (game_end(mode)) {
+      break;
+    }
+    else {
+      continue;
+    };
+#else
     cout << "input two position:\n";
     cin >> a.x >> a.y;
     cin >> b.x >> b.y;
 
     if (check_swap(a, b)) {
       gem_swap(a, b);
-      draw_board(mode);
       step_remained--;
       step_used++;
+      draw_board(mode);
     }
     else {
       /* Chi-chun edit: Remind the user that invalid operations are taken */
@@ -442,6 +466,7 @@ int main_game(int mode) {
       cout << "invalid operation!\n";
       continue;
     };
+#endif
 
     int combo = 0;
     do {
