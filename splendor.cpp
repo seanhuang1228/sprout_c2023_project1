@@ -17,16 +17,140 @@ static int player_score = 0;
 static int best_step = INT32_MAX;
 static int best_score = 0;
 
-#ifdef AI
-Gem copyboard[BOARD_HEIGHT][BOARD_WIDTH];
-#endif
-
 void apply_special(Pos, Pos);
 
 mt19937 mt(1);
 
 Gem get_gem(Pos pos) {
   return gameboard[pos.x][pos.y];
+}
+
+int check_line(Pos p) {
+  int curr_gem = gameboard[p.x][p.y].type;
+  int ret = 0;
+  if (curr_gem == GEM_NULL) return ret;
+  if (p.x != 0 and p.x != BOARD_HEIGHT - 1 and 
+      curr_gem == gameboard[p.x - 1][p.y].type and 
+      curr_gem == gameboard[p.x + 1][p.y].type)
+    ret |= 1;
+  if (p.y != 0 and p.y != BOARD_WIDTH - 1 and 
+      curr_gem == gameboard[p.x][p.y - 1].type and 
+      curr_gem == gameboard[p.x][p.y + 1].type)
+    ret |= 2;
+  return ret;
+}
+
+bool check_eliminate(Pos *pos) {
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      if (check_line({i, j})) {
+        if (pos) *pos = {i, j};
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+bool check_inboard(Pos t) {
+  return (t.x >= 0 and t.y >= 0 and t.x < BOARD_WIDTH and t.y < BOARD_HEIGHT);
+}
+
+bool check_swap(Pos a, Pos b) {
+  if (dist_sq(a, b) != 1) return 0;
+
+  if ((gameboard[a.x][a.y].ability > ABI_CROSS || gameboard[b.x][b.y].ability > ABI_CROSS)
+      and !(gameboard[a.x][a.y].type == GEM_NULL and gameboard[b.x][b.y].type == GEM_NULL)) {
+    return 1;
+  }
+
+  swap(gameboard[a.x][a.y], gameboard[b.x][b.y]);
+  bool ret = check_eliminate(nullptr);
+  swap(gameboard[a.x][a.y], gameboard[b.x][b.y]);
+
+  return ret;
+}
+
+void apply_bomb(Pos pos) {
+  elimi_tags[pos.x][pos.y] = 1;
+  for (int i = -1; i <= 1; ++i) {
+    for (int j = -1; j <= 1; ++j) {
+      if (check_inboard({pos.x + i, pos.y + j})) {
+        if (elimi_tags[pos.x + i][pos.y + j] == 0 and gameboard[pos.x + i][pos.y + j].ability > ABI_NORMAL)
+          apply_special({pos.x + i, pos.y + j}, {0, 0});
+        elimi_tags[pos.x + i][pos.y + j] = 1;
+      }
+    }
+  }
+}
+
+void apply_killsame(Pos pos, Pos tar) {
+  int type = gameboard[tar.x][tar.y].type;
+  elimi_tags[pos.x][pos.y] = 1;
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      if (gameboard[i][j].type == type) {
+        if (elimi_tags[i][j] == 0 and gameboard[i][j].ability > ABI_NORMAL) {
+          apply_special({i, j}, {0, 0});
+        }
+        elimi_tags[i][j] = 1;
+      }
+    }
+  }
+}
+
+void apply_cross(Pos pos) {
+  elimi_tags[pos.x][pos.y] = 1;
+  for (int i = 0; i < 4; ++i) {
+    Pos curr_pos = {pos.x + dir[i].x, pos.y + dir[i].y};
+    while (check_inboard(curr_pos)) {
+      if (!elimi_tags[curr_pos.x][curr_pos.y] and gameboard[curr_pos.x][curr_pos.y].ability > ABI_NORMAL)
+        apply_special(curr_pos, pos);
+
+      elimi_tags[curr_pos.x][curr_pos.y] = 1;
+      curr_pos.x += dir[i].x;
+      curr_pos.y += dir[i].y;
+    }
+  }
+}
+
+void apply_special(Pos pos, Pos tar) {
+  if (gameboard[pos.x][pos.y].ability == ABI_BOMB) {
+    apply_bomb(pos);
+  }
+  if (gameboard[pos.x][pos.y].ability == ABI_CROSS) {
+    apply_cross(pos);
+  }
+  if (gameboard[pos.x][pos.y].ability == ABI_KILLSAME) {
+    apply_killsame(pos, tar);
+  }
+}
+
+void dropping() {
+  // dropping
+  for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      if (gameboard[i][j].ability != ABI_NULL) continue;
+      int curr_height = i;
+      while (check_inboard({curr_height, j}) and gameboard[curr_height][j].ability == ABI_NULL)
+        curr_height--;
+      if (check_inboard({curr_height, j})) {
+        swap(gameboard[curr_height][j], gameboard[i][j]);
+        moved_tags[i][j] = 1;
+      }
+    }
+  }
+
+  // generate new gem if the position is empty
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      if (gameboard[i][j].ability == ABI_NULL)
+        gameboard[i][j].type = gen_rand_type(),
+        gameboard[i][j].ability = ABI_NORMAL,
+        moved_tags[i][j] = 1;
+    }
+  }
+  return;
 }
 
 int menu() {
@@ -85,107 +209,10 @@ void gen_board() {
   return;
 }
 
-
-int check_line(Pos p) {
-  int curr_gem = gameboard[p.x][p.y].type;
-  int ret = 0;
-  if (curr_gem == GEM_NULL) return ret;
-  if (p.x != 0 and p.x != BOARD_HEIGHT - 1 and 
-      curr_gem == gameboard[p.x - 1][p.y].type and 
-      curr_gem == gameboard[p.x + 1][p.y].type)
-    ret |= 1;
-  if (p.y != 0 and p.y != BOARD_WIDTH - 1 and 
-      curr_gem == gameboard[p.x][p.y - 1].type and 
-      curr_gem == gameboard[p.x][p.y + 1].type)
-    ret |= 2;
-  return ret;
-}
-
-bool check_eliminate(Pos *pos) {
-  for (int i = 0; i < BOARD_HEIGHT; ++i) {
-    for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (check_line({i, j})) {
-        if (pos) *pos = {i, j};
-        return 1;
-      }
-    }
-  }
-  return 0;
-}
-
 int dist_sq(Pos a, Pos b) {
   return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 }
 
-void apply_bomb(Pos pos) {
-  elimi_tags[pos.x][pos.y] = 1;
-  for (int i = -1; i <= 1; ++i) {
-    for (int j = -1; j <= 1; ++j) {
-      if (check_inboard({pos.x + i, pos.y + j})) {
-        if (elimi_tags[pos.x + i][pos.y + j] == 0 and gameboard[pos.x + i][pos.y + j].ability > ABI_NORMAL)
-          apply_special({pos.x + i, pos.y + j}, {0, 0});
-        elimi_tags[pos.x + i][pos.y + j] = 1;
-      }
-    }
-  }
-}
-
-void apply_killsame(Pos pos, Pos tar) {
-  int type = gameboard[tar.x][tar.y].type;
-  elimi_tags[pos.x][pos.y] = 1;
-  for (int i = 0; i < BOARD_HEIGHT; ++i) {
-    for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (gameboard[i][j].type == type) {
-        if (elimi_tags[i][j] == 0 and gameboard[i][j].ability > ABI_NORMAL) {
-          apply_special({i, j}, {0, 0});
-        }
-        elimi_tags[i][j] = 1;
-      }
-    }
-  }
-}
-
-void apply_cross(Pos pos) {
-  elimi_tags[pos.x][pos.y] = 1;
-  for (int i = 0; i < 4; ++i) {
-    Pos curr_pos = {pos.x + dir[i].x, pos.y + dir[i].y};
-    while (check_inboard(curr_pos)) {
-      if (!elimi_tags[curr_pos.x][curr_pos.y] and gameboard[curr_pos.x][curr_pos.y].ability > ABI_NORMAL)
-        apply_special(curr_pos, pos);
-
-      elimi_tags[curr_pos.x][curr_pos.y] = 1;
-      curr_pos.x += dir[i].x;
-      curr_pos.y += dir[i].y;
-    }
-  }
-}
-
-void apply_special(Pos pos, Pos tar) {
-  if (gameboard[pos.x][pos.y].ability == ABI_BOMB) {
-    apply_bomb(pos);
-  }
-  if (gameboard[pos.x][pos.y].ability == ABI_CROSS) {
-    apply_cross(pos);
-  }
-  if (gameboard[pos.x][pos.y].ability == ABI_KILLSAME) {
-    apply_killsame(pos, tar);
-  }
-}
-
-bool check_swap(Pos a, Pos b) {
-  if (dist_sq(a, b) != 1) return 0;
-
-  if ((gameboard[a.x][a.y].ability > ABI_CROSS || gameboard[b.x][b.y].ability > ABI_CROSS)
-      and !(gameboard[a.x][a.y].type == GEM_NULL and gameboard[b.x][b.y].type == GEM_NULL)) {
-    return 1;
-  }
-
-  swap(gameboard[a.x][a.y], gameboard[b.x][b.y]);
-  bool ret = check_eliminate(nullptr);
-  swap(gameboard[a.x][a.y], gameboard[b.x][b.y]);
-
-  return ret;
-}
 
 void eli_dfs(Pos pos, ElimiData *data, Pos *rnd_q) {
   visited[pos.x][pos.y] = 1;
@@ -364,36 +391,7 @@ void draw_board(int mode, int time = DRAW_PAUSE_TIME) {
   return;
 }
 
-void dropping() {
-  // dropping
-  for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
-    for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (gameboard[i][j].ability != ABI_NULL) continue;
-      int curr_height = i;
-      while (check_inboard({curr_height, j}) and gameboard[curr_height][j].ability == ABI_NULL)
-        curr_height--;
-      if (check_inboard({curr_height, j})) {
-        swap(gameboard[curr_height][j], gameboard[i][j]);
-        moved_tags[i][j] = 1;
-      }
-    }
-  }
 
-  // generate new gem if the position is empty
-  for (int i = 0; i < BOARD_HEIGHT; ++i) {
-    for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (gameboard[i][j].ability == ABI_NULL)
-        gameboard[i][j].type = gen_rand_type(),
-        gameboard[i][j].ability = ABI_NORMAL,
-        moved_tags[i][j] = 1;
-    }
-  }
-  return;
-}
-
-bool check_inboard(Pos t) {
-  return (t.x >= 0 and t.y >= 0 and t.x < BOARD_WIDTH and t.y < BOARD_HEIGHT);
-}
 
 bool check_dead() {
   bool is_dead = 1;
