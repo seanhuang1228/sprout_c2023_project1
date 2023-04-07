@@ -113,28 +113,29 @@ int dist_sq(Pos a, Pos b) {
   return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 }
 
-void apply_bomb(Pos pos, int recursive = 0) {
+void apply_bomb(Pos pos) {
   elimi_tags[pos.x][pos.y] = 1;
   for (int i = -1; i <= 1; ++i) {
     for (int j = -1; j <= 1; ++j) {
-      if (recursive and elimi_tags[pos.x + i][pos.y + j] == 0 and gameboard[pos.x + i][pos.y + j].ability > ABI_NORMAL)
-        apply_special({pos.x + i, pos.y + j}, {0, 0});
-      if (check_inboard({pos.x + i, pos.y + j}))
+      if (check_inboard({pos.x + i, pos.y + j})) {
+        if (elimi_tags[pos.x + i][pos.y + j] == 0 and gameboard[pos.x + i][pos.y + j].ability > ABI_NORMAL)
+          apply_special({pos.x + i, pos.y + j}, {0, 0});
         elimi_tags[pos.x + i][pos.y + j] = 1;
+      }
     }
   }
 }
 
-void apply_killsame(Pos pos, Pos tar, int recursive = 0) {
+void apply_killsame(Pos pos, Pos tar) {
   int type = gameboard[tar.x][tar.y].type;
   elimi_tags[pos.x][pos.y] = 1;
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (gameboard[i][j].type == type) {
-        elimi_tags[i][j] = 1;
-        if (recursive and elimi_tags[i][j] == 0 and gameboard[i][j].ability > ABI_NORMAL) {
+        if (elimi_tags[i][j] == 0 and gameboard[i][j].ability > ABI_NORMAL) {
           apply_special({i, j}, {0, 0});
         }
+        elimi_tags[i][j] = 1;
       }
     }
   }
@@ -157,13 +158,13 @@ void apply_cross(Pos pos) {
 
 void apply_special(Pos pos, Pos tar) {
   if (gameboard[pos.x][pos.y].ability == ABI_BOMB) {
-    apply_bomb(pos, 1);
+    apply_bomb(pos);
   }
   if (gameboard[pos.x][pos.y].ability == ABI_CROSS) {
     apply_cross(pos);
   }
   if (gameboard[pos.x][pos.y].ability == ABI_KILLSAME) {
-    apply_killsame(pos, tar, 1);
+    apply_killsame(pos, tar);
   }
 }
 
@@ -279,8 +280,15 @@ void eliminate(int mode, int combo) {
   // apply specail ability of cross
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
-      if (elimi_tags[i][j] and gameboard[i][j].ability == ABI_CROSS) {
-        apply_cross({i, j});
+      if (elimi_tags[i][j] and gameboard[i][j].ability >= ABI_CROSS) {
+        Pos tar = {};
+        for (int k = 0; k < 4; ++k) {
+          Pos curr_test = {i + dir[k].x, j + dir[k].y};
+          if (check_inboard(curr_test) and moved_tags[curr_test.x][curr_test.y]) {
+            tar = curr_test;
+          }
+        }
+        apply_special({i, j}, tar);
       }
     }
   }
@@ -400,31 +408,16 @@ bool game_end(int mode) {
 }
 
 void gem_swap(Pos a, Pos b) {
-  if (gameboard[a.x][a.y].ability > ABI_CROSS || gameboard[b.x][b.y].ability > ABI_CROSS) {
-    switch (gameboard[a.x][a.y].ability) {
-      case ABI_BOMB:
-        apply_bomb(a);
-        break;
-      case ABI_KILLSAME:
-        apply_killsame(a, b);
-        break;
-    }
-    switch (gameboard[b.x][b.y].ability) {
-      case ABI_BOMB:
-        apply_bomb(b);
-        break;
-      case ABI_KILLSAME:
-        apply_killsame(b, a);
-        break;
-    }
+  moved_tags[a.x][a.y] = 1;
+  moved_tags[b.x][b.y] = 1;
 
+  if (gameboard[a.x][a.y].ability > ABI_CROSS || gameboard[b.x][b.y].ability > ABI_CROSS) {
+    if (gameboard[a.x][a.y].ability > ABI_CROSS) elimi_tags[a.x][a.y] = 1;
+    if (gameboard[b.x][b.y].ability > ABI_CROSS) elimi_tags[b.x][b.y] = 1;
     return;
   }
 
   swap(gameboard[a.x][a.y], gameboard[b.x][b.y]);
-
-  moved_tags[a.x][a.y] = 1;
-  moved_tags[b.x][b.y] = 1;
 }
 
 void init_global_variable() {
