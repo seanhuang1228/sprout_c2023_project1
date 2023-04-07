@@ -25,6 +25,10 @@ void apply_special(Pos, Pos);
 
 mt19937 mt(1);
 
+Gem get_gem(Pos pos) {
+  return gameboard[pos.x][pos.y];
+}
+
 int menu() {
   system("clear");
   int game_mode = 0;
@@ -443,12 +447,7 @@ int main_game(int mode) {
     Pos a, b;
 
 #ifdef AI
-    for (int i = 0; i < BOARD_HEIGHT; ++i) {
-      for (int j = 0; j < BOARD_WIDTH; ++j) {
-        copyboard[i][j] = gameboard[i][j];
-      }
-    }
-    ai (copyboard, &a, &b);
+    ai (&a, &b);
 
     step_remained--;
     step_used++;

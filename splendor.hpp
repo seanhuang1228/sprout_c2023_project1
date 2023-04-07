@@ -58,6 +58,7 @@ int main_game(int);
 int gen_rand_type();
 int gen_rand();
 int dist_sq(Pos, Pos);
+Gem get_gem(Pos);
 
 int check_line(Pos);
 bool check_eliminate(Pos*);
@@ -66,4 +67,4 @@ bool check_inboard(Pos);
 bool check_dead();
 
 void draw_board(int, int);
-void ai(Gem [][10], Pos*, Pos*);
+void ai(Pos*, Pos*);
