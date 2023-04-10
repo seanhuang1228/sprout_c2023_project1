@@ -41,38 +41,38 @@ int check_line(Pos p) {
 }
 
 bool check_eliminate(Pos *pos) {
-  // TODO: Prob 1-1
+  // TODO: Task 1-1
   return 0;
 }
 
 bool check_inboard(Pos t) {
-  // TODO: Prob 1-2
+  // TODO: Task 1-2
   return 0;
 }
 
 bool check_swap(Pos a, Pos b) {
-  // TODO: Prob 1-3
+  // TODO: Task 1-3
   return 0;
 }
 
 void apply_bomb(Pos pos) {
-  // TODO: Prob 2-1
+  // TODO: Task 2-1
 }
 
 void apply_killsame(Pos pos, Pos tar) {
-  // TODO: Prob 2-2
+  // TODO: Task 2-2
 }
 
 void apply_cross(Pos pos) {
-  // TODO: Prob 2-3
+  // TODO: Task 2-3
 }
 
 void apply_special(Pos pos, Pos tar) {
-  // TODO: Prob 2-4
+  // TODO: Task 2-4
 }
 
 void dropping() {
-  // TODO: Prob 3
+  // TODO: Task 3
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (gameboard[i][j].ability != ABI_NULL) continue;
