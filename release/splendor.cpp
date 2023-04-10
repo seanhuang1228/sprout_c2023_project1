@@ -124,7 +124,7 @@ int gen_rand() {
 }
 
 int gen_rand_type() {
-  return gen_rand() % 5 + 1; // TODO: maybe use a faster way to random?
+  return gen_rand() % 5 + 1;
 }
 
 string get_color(int type) {
