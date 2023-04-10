@@ -323,7 +323,7 @@ void eliminate(int mode, int combo) {
     }
   }
 
-  draw_board(mode, 1500);
+  draw_board(mode, combo, 1500);
 
   // generate special gem and calculate the score of them
   for (int i = 0; i < gen_cnt; ++i) {
@@ -352,16 +352,16 @@ void clean_color() {
   cout << "\x1b[0m";
 }
 
-void draw_board(int mode, int time = DRAW_PAUSE_TIME) {
+void draw_board(int mode, int combo, int time = DRAW_PAUSE_TIME) {
   system("clear");
 
   if (mode == MODE_STEP) {
-    cout << "STEP REMAINED: " << step_remained << "\nSCORE: " << player_score;
+    cout << "STEP REMAINED: " << step_remained << "\nSCORE: " << player_score << " COMBO: " << combo;
     if (best_score != 0) cout << " BEST SCORE: " << best_score;
     cout << "\n\n";
   }
   else if (mode == MODE_SCORE) {
-    cout << "STEP USED: " << step_used << "\nSCORE/TARGET: " << player_score << "/" << SCORE_TARGET;
+    cout << "STEP USED: " << step_used << "\nSCORE/TARGET: " << player_score << "/" << SCORE_TARGET << " COMBO: " << combo;
     if (best_step != 0) cout << " BEST STEP: " << best_step;
     cout << "\n\n";
   }
@@ -432,7 +432,7 @@ void game_init(int mode) {
     gen_board();
   } while(check_dead());
   init_global_variable();
-  draw_board(mode);
+  draw_board(mode, 0);
   return;
 }
 
@@ -450,7 +450,7 @@ int main_game(int mode) {
     step_used++;
     if (check_swap(a, b)) {
       gem_swap(a, b);
-      draw_board(mode);
+      draw_board(mode, 0);
     }
     else if (game_end(mode)) {
       break;
@@ -467,11 +467,11 @@ int main_game(int mode) {
       gem_swap(a, b);
       step_remained--;
       step_used++;
-      draw_board(mode);
+      draw_board(mode, 0);
     }
     else {
       /* Chi-chun edit: Remind the user that invalid operations are taken */
-      draw_board(mode, 0);
+      draw_board(mode, 0, 0);
       cout << "invalid operation!\n";
       continue;
     };
@@ -480,10 +480,11 @@ int main_game(int mode) {
     int combo = 0;
     do {
       eliminate(mode, combo);
-      draw_board(mode);
+      draw_board(mode, combo, 0);
       dropping();
-      draw_board(mode);
+      draw_board(mode, combo, 0);
       combo++;
+      cout << "Combo!" << endl;
     } while (check_eliminate(nullptr));
 
     // reset moved_tags
@@ -497,7 +498,7 @@ int main_game(int mode) {
     while (check_dead()) {
       gen_board();
     }
-    draw_board(mode, 0);
+    draw_board(mode, 0, 0);
 
     if (game_end(mode)) running = 0;
   } while (running);
