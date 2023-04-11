@@ -73,8 +73,8 @@ bool check_swap(Pos a, Pos b) {
 
 void apply_bomb(Pos pos) {
   elimi_tags[pos.x][pos.y] = 1;
-  for (int i = -1; i <= 1; ++i) {
-    for (int j = -1; j <= 1; ++j) {
+  for (int i = -2; i <= 2; ++i) {
+    for (int j = -2; j <= 2; ++j) {
       if (check_inboard({pos.x + i, pos.y + j})) {
         if (elimi_tags[pos.x + i][pos.y + j] == 0 and gameboard[pos.x + i][pos.y + j].ability > ABI_NORMAL)
           apply_special({pos.x + i, pos.y + j}, {0, 0});
@@ -480,9 +480,9 @@ int main_game(int mode) {
     int combo = 0;
     do {
       eliminate(mode, combo);
-      draw_board(mode, combo, 0);
+      draw_board(mode, combo);
       dropping();
-      draw_board(mode, combo, 0);
+      draw_board(mode, combo);
       combo++;
       cout << "Combo!" << endl;
     } while (check_eliminate(nullptr));

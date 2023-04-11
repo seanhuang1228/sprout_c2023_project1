@@ -12,7 +12,7 @@ ifeq ($(MODE), ai)
 endif
 
 all: $(OBJ)
-	mkdir bin
+	-mkdir bin
 	$(CC) -o $(EXE) $(OBJ) $(FLAG)
 
 %.o: %.cpp

@@ -66,5 +66,5 @@ bool check_swap(Pos, Pos);
 bool check_inboard(Pos);
 bool check_dead();
 
-void draw_board(int, int);
+void draw_board(int, int, int);
 void ai(Pos*, Pos*);
