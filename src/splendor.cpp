@@ -77,7 +77,7 @@ void apply_bomb(Pos pos) {
     for (int j = -2; j <= 2; ++j) {
       if (check_inboard({pos.x + i, pos.y + j})) {
         if (elimi_tags[pos.x + i][pos.y + j] == 0 and gameboard[pos.x + i][pos.y + j].ability > ABI_NORMAL)
-          apply_special({pos.x + i, pos.y + j}, {0, 0});
+          apply_special({pos.x + i, pos.y + j}, {-1, -1});
         elimi_tags[pos.x + i][pos.y + j] = 1;
       }
     }
@@ -85,13 +85,19 @@ void apply_bomb(Pos pos) {
 }
 
 void apply_killsame(Pos pos, Pos tar) {
-  int type = gameboard[tar.x][tar.y].type;
+  int type = GEM_NULL;
+  if (check_inboard(tar)) {
+    type = gameboard[tar.x][tar.y].type;
+  }
+  else {
+    type = gen_rand_type();
+  }
   elimi_tags[pos.x][pos.y] = 1;
   for (int i = 0; i < BOARD_HEIGHT; ++i) {
     for (int j = 0; j < BOARD_WIDTH; ++j) {
       if (gameboard[i][j].type == type) {
         if (elimi_tags[i][j] == 0 and gameboard[i][j].ability > ABI_NORMAL) {
-          apply_special({i, j}, {0, 0});
+          apply_special({i, j}, {-1, -1});
         }
         elimi_tags[i][j] = 1;
       }
