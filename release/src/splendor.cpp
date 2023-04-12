@@ -40,12 +40,12 @@ int check_line(Pos p) {
   return ret;
 }
 
-bool check_eliminate(Pos *pos) {
+bool check_inboard(Pos t) {
   // TODO: Task 1-1
   return 0;
 }
 
-bool check_inboard(Pos t) {
+bool check_eliminate(Pos *pos) {
   // TODO: Task 1-2
   return 0;
 }
