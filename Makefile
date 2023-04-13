@@ -1,9 +1,9 @@
 CC := g++
 S := src
 T := bin
-EXE := $T/main.out
+EXE := $T/main.exe
 OBJ := $S/main.o $S/splendor.o
-FLAG := -Wall
+FLAG := --std=c++11 -Wall
 MODE := normal
 
 ifeq ($(MODE), ai)
