@@ -57,6 +57,9 @@ bool check_inboard(Pos t) {
 }
 
 bool check_swap(Pos a, Pos b) {
+  if (!check_inboard(a) || !check_inboard(b))
+    return 0;
+
   if (dist_sq(a, b) != 1) return 0;
 
   if ((gameboard[a.x][a.y].ability > ABI_CROSS || gameboard[b.x][b.y].ability > ABI_CROSS)
@@ -442,6 +445,15 @@ void game_init(int mode) {
   return;
 }
 
+bool check_str_int(string str) {
+  if (str.length() >= 10) return 0;
+  for (uint i = 0; i < str.length(); ++i) {
+    if (str[i] < '0' || str[i] > '9')
+      return 0;
+  }
+  return 1;
+}
+
 int main_game(int mode) {
   int running = 1;
   int step = 0;
@@ -466,8 +478,23 @@ int main_game(int mode) {
     };
 #else
     cout << "input two position:\n";
-    cin >> a.x >> a.y;
-    cin >> b.x >> b.y;
+    string input[4];
+    for (int i = 0; i < 4; ++i) cin >> input[i];
+    int input_validity = 1;
+    for (int i = 0; i < 4; ++i) {
+      if (!check_str_int(input[i])) {
+        input_validity = 0;
+      }
+    }
+    if (input_validity) {
+      a.x = stoi(input[0]);
+      a.y = stoi(input[1]);
+      b.x = stoi(input[2]);
+      b.y = stoi(input[3]);
+    }
+    else {
+      a.x = -1;
+    }
 
     if (check_swap(a, b)) {
       gem_swap(a, b);
