@@ -16,10 +16,9 @@ static int step_used = 0;
 static int player_score = 0;
 static int best_step = INT32_MAX;
 static int best_score = 0;
+mt19937 mt(RND_SEED);
 
 void apply_special(Pos, Pos);
-
-mt19937 mt(1);
 
 Gem get_gem(Pos pos) {
   return gameboard[pos.x][pos.y];
@@ -267,7 +266,7 @@ void eliminate(int mode, int combo) {
     }
   }
 
-  draw_board(mode, 1500);
+  draw_board(mode, combo, 1500);
 
   // generate special gem and calculate the score of them
   for (int i = 0; i < gen_cnt; ++i) {
@@ -296,16 +295,16 @@ void clean_color() {
   cout << "\x1b[0m";
 }
 
-void draw_board(int mode, int time = DRAW_PAUSE_TIME) {
+void draw_board(int mode, int combo, int time = DRAW_PAUSE_TIME) {
   system("clear");
 
   if (mode == MODE_STEP) {
-    cout << "STEP REMAINED: " << step_remained << "\nSCORE: " << player_score;
+    cout << "STEP REMAINED: " << step_remained << "\nSCORE: " << player_score << " COMBO: " << combo;
     if (best_score != 0) cout << " BEST SCORE: " << best_score;
     cout << "\n\n";
   }
   else if (mode == MODE_SCORE) {
-    cout << "STEP USED: " << step_used << "\nSCORE/TARGET: " << player_score << "/" << SCORE_TARGET;
+    cout << "STEP USED: " << step_used << "\nSCORE/TARGET: " << player_score << "/" << SCORE_TARGET << " COMBO: " << combo;
     if (best_step != 0) cout << " BEST STEP: " << best_step;
     cout << "\n\n";
   }
@@ -376,8 +375,17 @@ void game_init(int mode) {
     gen_board();
   } while(check_dead());
   init_global_variable();
-  draw_board(mode);
+  draw_board(mode, 0);
   return;
+}
+
+bool check_str_int(string str) {
+  if (str.length() >= 10) return 0;
+  for (uint i = 0; i < str.length(); ++i) {
+    if (str[i] < '0' || str[i] > '9')
+      return 0;
+  }
+  return 1;
 }
 
 int main_game(int mode) {
@@ -394,7 +402,7 @@ int main_game(int mode) {
     step_used++;
     if (check_swap(a, b)) {
       gem_swap(a, b);
-      draw_board(mode);
+      draw_board(mode, 0);
     }
     else if (game_end(mode)) {
       break;
@@ -404,18 +412,33 @@ int main_game(int mode) {
     };
 #else
     cout << "input two position:\n";
-    cin >> a.x >> a.y;
-    cin >> b.x >> b.y;
+    string input[4];
+    for (int i = 0; i < 4; ++i) cin >> input[i];
+    int input_validity = 1;
+    for (int i = 0; i < 4; ++i) {
+      if (!check_str_int(input[i])) {
+        input_validity = 0;
+      }
+    }
+    if (input_validity) {
+      a.x = stoi(input[0]);
+      a.y = stoi(input[1]);
+      b.x = stoi(input[2]);
+      b.y = stoi(input[3]);
+    }
+    else {
+      a.x = -1;
+    }
 
     if (check_swap(a, b)) {
       gem_swap(a, b);
       step_remained--;
       step_used++;
-      draw_board(mode);
+      draw_board(mode, 0);
     }
     else {
       /* Chi-chun edit: Remind the user that invalid operations are taken */
-      draw_board(mode, 0);
+      draw_board(mode, 0, 0);
       cout << "invalid operation!\n";
       continue;
     };
@@ -424,10 +447,11 @@ int main_game(int mode) {
     int combo = 0;
     do {
       eliminate(mode, combo);
-      draw_board(mode);
+      draw_board(mode, combo);
       dropping();
-      draw_board(mode);
+      draw_board(mode, combo);
       combo++;
+      cout << "Combo!" << endl;
     } while (check_eliminate(nullptr));
 
     // reset moved_tags
@@ -441,7 +465,7 @@ int main_game(int mode) {
     while (check_dead()) {
       gen_board();
     }
-    draw_board(mode, 0);
+    draw_board(mode, 0, 0);
 
     if (game_end(mode)) running = 0;
   } while (running);

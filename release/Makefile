@@ -1,9 +1,9 @@
 CC := g++
 S := src
 T := bin
-EXE := $T/main.out
+EXE := $T/main.exe
 OBJ := $S/main.o $S/splendor.o
-FLAG := -Wall
+FLAG := --std=c++11
 MODE := normal
 
 ifeq ($(MODE), ai)
@@ -12,7 +12,7 @@ ifeq ($(MODE), ai)
 endif
 
 all: $(OBJ)
-	mkdir bin
+	-mkdir bin
 	$(CC) -o $(EXE) $(OBJ) $(FLAG)
 
 %.o: %.cpp
