@@ -16,10 +16,9 @@ static int step_used = 0;
 static int player_score = 0;
 static int best_step = INT32_MAX;
 static int best_score = 0;
+mt19937 mt(RND_SEED);
 
 void apply_special(Pos, Pos);
-
-mt19937 mt(1);
 
 Gem get_gem(Pos pos) {
   return gameboard[pos.x][pos.y];
