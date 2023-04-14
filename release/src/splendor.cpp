@@ -97,7 +97,7 @@ void dropping() {
 }
 
 int menu() {
-  system("clear");
+  cout << "\033[2J\033[1;1H";
   int game_mode = 0;
   cout << "======================================\n\n"
        << " Welcome to Sprout Crush!\n\n"
@@ -114,7 +114,7 @@ int menu() {
     else cout << "invalid mode! try again.\n\n";
   }
 
-  system("clear");
+  cout << "\033[2J\033[1;1H";
   return game_mode;
 }
 
@@ -296,7 +296,7 @@ void clean_color() {
 }
 
 void draw_board(int mode, int combo, int time = DRAW_PAUSE_TIME) {
-  system("clear");
+  cout << "\033[2J\033[1;1H";
 
   if (mode == MODE_STEP) {
     cout << "STEP REMAINED: " << step_remained << "\nSCORE: " << player_score << " COMBO: " << combo;
@@ -381,7 +381,7 @@ void game_init(int mode) {
 
 bool check_str_int(string str) {
   if (str.length() >= 10) return 0;
-  for (uint i = 0; i < str.length(); ++i) {
+  for (unsigned int i = 0; i < str.length(); ++i) {
     if (str[i] < '0' || str[i] > '9')
       return 0;
   }
