@@ -370,7 +370,7 @@ void draw_board(int mode, int combo, int time = DRAW_PAUSE_TIME) {
   }
   else if (mode == MODE_SCORE) {
     cout << "STEP USED: " << step_used << "\nSCORE/TARGET: " << player_score << "/" << SCORE_TARGET << " COMBO: " << combo;
-    if (best_step != 0) cout << " BEST STEP: " << best_step;
+    if (best_step != INT32_MAX) cout << " BEST STEP: " << best_step;
     cout << "\n\n";
   }
 
