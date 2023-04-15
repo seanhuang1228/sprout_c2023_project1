@@ -396,7 +396,7 @@ int main_game(int mode) {
     Pos a, b;
 
 #ifdef AI
-    ai (&a, &b);
+    ai (a, b);
 
     step_remained--;
     step_used++;

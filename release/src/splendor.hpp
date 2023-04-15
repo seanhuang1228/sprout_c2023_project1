@@ -68,4 +68,4 @@ bool check_inboard(Pos);
 bool check_dead();
 
 void draw_board(int, int, int);
-void ai(Pos*, Pos*);
+void ai(Pos&, Pos&);
