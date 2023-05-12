@@ -370,7 +370,7 @@ void draw_board(int mode, int combo, int time = DRAW_PAUSE_TIME) {
   }
   else if (mode == MODE_SCORE) {
     cout << "STEP USED: " << step_used << "\nSCORE/TARGET: " << player_score << "/" << SCORE_TARGET << " COMBO: " << combo;
-    if (best_step != 0) cout << " BEST STEP: " << best_step;
+    if (best_step != INT32_MAX) cout << " BEST STEP: " << best_step;
     cout << "\n\n";
   }
 
@@ -435,11 +435,20 @@ void init_global_variable() {
   player_score = 0;
 }
 
+void init_gameboard() {
+  for (int i = 0; i < BOARD_HEIGHT; ++i) {
+    for (int j = 0; j < BOARD_WIDTH; ++j) {
+      gameboard[i][j].ability = ABI_NORMAL;
+    }
+  }
+}
+
 void game_init(int mode) {
   do {
     gen_board();
   } while(check_dead());
   init_global_variable();
+  init_gameboard();
   draw_board(mode, 0);
   return;
 }
