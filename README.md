@@ -1,7 +1,7 @@
 # Sprout C2023 Project 1
 
-## TODO list and locks
+## Spec
 
-[Here][hackmd]
+[Spec][hackmd]
 
-[hackmd]: https://hackmd.io/p_ITv_F0SSSMzQjMoU1Fwg?view
+[hackmd]: https://hackmd.io/@109nfDWYQD66KCH8w6Osow/SJsdPObzn 
